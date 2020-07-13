@@ -1,80 +1,55 @@
-#define STB_IMAGE_IMPLEMENTATION
 #include "Cube.h"
 #include "../Textures/Texture.h"
 #include "../Renderer/Renderer.h"
 
-/*
- * FACES = {
-    "right.png",
-    "left.png",
-    "top.png",
-    "bottom.png",
-    "front.png",
-    "back.png"
-    }
- *
- */
-
-
-
-
-Cube::Cube(float offx, float offy, float offz, std::array<char *, 6> textures, float s) : offx(offx), offy(offy),
+Cube::Cube(float offx, float offy, float offz, std::array<char *, 6> cubeType, float s) : offx(offx), offy(offy),
                                                                                           offz(offz), s(s),
-                                                                                          textures(textures) {
-    cubeMap = {         //(x,y,z,texCoordX,texCoordY)
-            //Front
-            -s + offx, s + offy, -s + offz,  //A
-            s + offx, s + offy, -s + offz,   //B
-            s + offx, -s + offy, -s + offz,  //C
-            -s + offx, -s + offy, -s + offz, //D
-            // Back
-            -s + offx, s + offy, s + offz,
-            s + offx, s + offy, s + offz,
-            s + offx, -s + offy, s + offz,
-            -s + offx, -s + offy, s + offz,
-            //Right
-            s + offx, s + offy, -s + offz,
-            s + offx, s + offy, s + offz,
-            s + offx, -s + offy, s + offz,
-            s + offx, -s + offy, -s + offz,
-            //Left
-            -s + offx, s + offy, s + offz,
-            -s + offx, s + offy, -s + offz,
-            -s + offx, -s + offy, -s + offz,
-            -s + offx, -s + offy, s + offz,
-            //Top
-            -s + offx, s + offy, s + offz,
-            s + offx, s + offy, s + offz,
-            s + offx, s + offy, -s + offz,
-            -s + offx, s + offy, -s + offz,
-            //Bottom
-            -s + offx, -s + offy, -s + offz,
-            s + offx, -s + offy, -s + offz,
-            s + offx, -s + offy, s + offz,
-            -s + offx, -s + offy, s + offz,
+                                                                                          cubeType(cubeType) {
+    std::array<float, 20> front = {
+            -s + offx, s + offy, -s + offz, 0.0f, 1.0f,  //F-A -s s 0
+            s + offx, s + offy, -s + offz, 1.0f, 1.0f,  //F-B s s 1
+            s + offx, -s + offy, -s + offz, 1.0f, 0.0f,  //F-C s -s 2
+            -s + offx, -s + offy, -s + offz, 0.0f, 0.0f  //F-D -s -s 3
     };
-
+    std::array<float, 20> back = {
+            -s + offx, s + offy, s + offz, 0.0f, 1.0f, //B-A -s s 4
+            s + offx, s + offy, s + offz, 1.0f, 1.0f,  //B-B s s 5
+            s + offx, -s + offy, s + offz, 1.0f, 0.0f, //B-C s- s 6
+            -s + offx, -s + offy, s + offz, 0.0f, 0.0f  //B-D -s -s 7
+    };
+    std::array<float, 20> right = {
+            s + offx, s + offy, -s + offz, 0.0f, 1.0f, //F-B
+            s + offx, s + offy, s + offz, 1.0f, 1.0f, //B-B
+            s + offx, -s + offy, s + offz, 1.0f, 0.0f, //B-C
+            s + offx, -s + offy, -s + offz, 0.0f, 0.0f  //F-C
+    };
+    std::array<float, 20> left = {
+            -s + offx, s + offy, s + offz, 0.0f, 1.0f, //B-A
+            -s + offx, s + offy, -s + offz, 1.0f, 1.0f, //F-A
+            -s + offx, -s + offy, -s + offz, 1.0f, 0.0f, //F-D
+            -s + offx, -s + offy, s + offz, 0.0f, 0.0f  //B-D
+    };
+    std::array<float, 20> top = {
+            -s + offx, s + offy, s + offz, 0.0f, 1.0f, //B-A
+            s + offx, s + offy, s + offz, 1.0f, 1.0f, //B-B
+            s + offx, s + offy, -s + offz, 1.0f, 0.0f, //F-B
+            -s + offx, s + offy, -s + offz, 0.0f, 0.0f  //F-A
+    };
+    std::array<float, 20> bottom = {
+            -s + offx, -s + offy, -s + offz, 0.0f, 1.0f,//F-D
+            s + offx, -s + offy, -s + offz, 1.0f, 1.0f,//F-C
+            s + offx, -s + offy, s + offz, 1.0f, 0.0f,//B-C
+            -s + offx, -s + offy, s + offz, 0.0f, 0.0f //B-D
+    };
+    cubeMap = {front, back, right, left, top, bottom};
+    texIdList = Texture().loadCube(cubeType);
     cubeVAO = Renderer().initVertexBuffs(cubeMap);
-    cubeMapTexId = Texture().loadCubemap(textures);
-
 }
 
-const std::array<float, 96> &Cube::getCubeMap() const {
-    return cubeMap;
+const std::array<unsigned int, 6> &Cube::getTexIdList() const {
+    return texIdList;
 }
 
-const std::array<char *, 6> &Cube::getTextures() const {
-    return textures;
-}
-
-void Cube::setTextures(const std::array<char *, 6> &textures) {
-    Cube::textures = textures;
-}
-
-unsigned int Cube::getCubeMapTexId() const {
-    return cubeMapTexId;
-}
-
-unsigned int Cube::getCubeVAO() const {
+const std::array<unsigned int, 6> &Cube::getCubeVAO() const {
     return cubeVAO;
 }

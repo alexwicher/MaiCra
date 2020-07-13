@@ -10,7 +10,7 @@
 
 class Texture {
 public:
-    unsigned int loadTextures();
+    std::array<unsigned  int, 6> loadCube(std::array<char *, 6> cubeType);
     unsigned int loadCubemap(std::array<char*, 6> faces);
 };
 

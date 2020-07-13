@@ -1,10 +1,10 @@
 #version 130
 
-in vec3 coords;
+in vec2 coords;
 
 out vec4 outputColor;
 
-uniform samplerCube texture1;
+uniform sampler2D texture1;
 
 void main()
 {

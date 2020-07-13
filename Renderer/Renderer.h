@@ -11,9 +11,9 @@
 
 class Renderer {
 public:
-    unsigned int initVertexBuffs(std::array<float, 96> cubeMap);
+    std::array<unsigned int, 6> initVertexBuffs(std::array<std::array<float,20>, 6> cubeMap);
 
-    void renderCube(unsigned int VAO, unsigned cubeTexID, ShaderLoader shader);
+    void renderCube(std::array<unsigned int , 6> VAOList, std::array<unsigned int, 6> texIDsList, ShaderLoader shader);
 };
 
 
