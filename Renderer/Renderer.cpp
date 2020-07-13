@@ -1,6 +1,10 @@
 #include "Renderer.h"
 #include "../Shader/ShaderLoader.h"
+#include "../gameSettings.h"
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 std::array<unsigned int, 6> Renderer::initVertexBuffs(std::array<std::array<float,20>, 6> cubeMap) {
@@ -35,11 +39,18 @@ std::array<unsigned int, 6> Renderer::initVertexBuffs(std::array<std::array<floa
 }
 
 void Renderer::renderCube(std::array<unsigned int , 6> VAOList,std::array<unsigned int , 6> texIDsList, ShaderLoader shader) {
+
+    shader.use();
+    glm::mat4 projection = glm::perspective(glm::radians(FOV), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    shader.setMat4("projection", projection);
+
+    // modelView transformation
+    glm::mat4 view = glm::mat4(1);
+    shader.setMat4("modelView", view);
+
     for (int i = 0; i < 6; ++i) {
         unsigned int texID = texIDsList[i] ,VAO = VAOList[i];
-
         glBindTexture(GL_TEXTURE_2D, texID);
-        shader.use();
         glBindVertexArray(VAO);
         glDrawArrays(GL_POLYGON, 0, 4);
     }

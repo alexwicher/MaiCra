@@ -5,13 +5,11 @@ in vec2 textCoords;
 
 out vec2 coords;
 
-//uniform mat4 view;
-//uniform mat4 projection;
-//uniform mat4 model;
+uniform mat4 modelView;
+uniform mat4 projection;
 
 void main()
 {
-//	projection * view * model *
-	gl_Position = vec4(position, 1.0f);
+	gl_Position = projection * modelView * vec4(position, 1.0f);
 	coords = textCoords;
 }

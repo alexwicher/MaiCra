@@ -32,9 +32,9 @@ std::array<unsigned int, 6> Texture::loadCube(std::array<char *, 6> cubeType) {
             int width=0, height=0, nrChannels=0;
             stbi_set_flip_vertically_on_load(true);
             std::string fullPath = path;
-            unsigned char *data = stbi_load(fullPath.append(type).data(), &width, &height, &nrChannels, 0);
+            unsigned char *data = stbi_load(fullPath.append(type).data(), &width, &height, &nrChannels, STBI_rgb_alpha);
             if (data) {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
                 glGenerateMipmap(GL_TEXTURE_2D);
             } else {
                 std::cout << "Failed to load texture" << std::endl;
