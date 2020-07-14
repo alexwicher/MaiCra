@@ -1,27 +1,27 @@
 #ifndef MAICRA_MAPLOADER_H
 #define MAICRA_MAPLOADER_H
 
-
+#include <vector>
 #include "../Cube/Cube.h"
+#include "../Camera/Camera.h"
+#include "../Shader/ShaderLoader.h"
+#include "../Control/Control.h"
 
 class MapLoader {
-public:
-    unsigned int* loadMap();
-    void renderMap();
 
 private:
-    Cube* cubeList;
+    glm::vec3 pos;
+    Control controls;
+    Camera cam;
+    ShaderLoader mapShader;
+    Cube * cubeList;
+    int mapX,mapY;
 public:
-    Cube *getCubeList() const;
+    MapLoader(Camera cam, ShaderLoader mapShader,Cube * cubeList,int mapY,int mapX);
+    void loadDumbMap(int x, int y);
+    void initMap(glm::vec3 pos);
+    void handleControls(bool *  loop,SDL_Window * window);
 
-    void setCubeList(Cube *cubeList);
-
-public:
-    MapLoader(Cube *cubeList);
-
-private:
-    unsigned int* VAOs;
 };
-
 
 #endif //MAICRA_MAPLOADER_H

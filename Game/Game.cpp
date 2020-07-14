@@ -5,38 +5,39 @@
 #include "../Renderer/Renderer.h"
 #include "../Cube/Cube.h"
 #include "../Textures/Texture.h"
-#include "../Resources/cubes/cubeTypes.h"
+#include "../Camera/Camera.h"
+#include "../gameSettings.h"
 #include "../Control/Control.h"
+#include "../MapLoader/MapLoader.h"
+#include "../Resources/cubes/cubeTypes.h"
 #include <iostream>
-
 
 int Game::startGame() {
     Window win = Window(screen_width, screen_height);
     SDL_Window *window = win.create_window();
-    Control control = Control();
-    Cube cube = Cube(0.0f, 0.0f, 0.0f, GRASS_BLOCK);
+    Cube * flatRetardedMap = (Cube*)malloc(5*5* sizeof(Cube));
+    std::array<unsigned int, 6> textures = Texture().loadCube(GRASS_BLOCK);
+    int x = 15, y = 15;
+    for (int i = 0; i < x; ++i) {
+        for (int j = 0; j < y; ++j) {
+            flatRetardedMap[i*x + j] = Cube(i, 0, j, textures);
+        }
+    }
+    MapLoader dumbMap = MapLoader(Camera(glm::vec3(0, 0, 0)),
+                                  ShaderLoader(const_cast<char *>("../Shader/rtsShader.vert"),
+                                               const_cast<char *>("../Shader/rtsShader.frag")),
+                                  flatRetardedMap,x,y);
 
-    ShaderLoader shader = ShaderLoader(const_cast<char *>("../Shader/rtsShader.vert"),
-                                       const_cast<char *>("../Shader/rtsShader.frag"));
-    shader.use();
-    shader.setInt("texture1", 0);
+    dumbMap.initMap(glm::vec3(0, 0, 0));
+
 
     //Main loop ...
     bool loop = true;
     uint32_t ticks, lastticks = 0;
     while (loop) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT)
-                loop = false;
-        }
 
-        control.handleKeyBoard();
-        control.handleMouse(window);
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Renderer().renderCube(cube.getCubeVAO(), cube.getTexIdList(), shader);
+        dumbMap.handleControls(&loop, window);
+        dumbMap.loadDumbMap(5, 5);
 
         ticks = SDL_GetTicks();
         if (((ticks * 10 - lastticks * 10)) < 167) //60 MAX FPS
@@ -49,18 +50,3 @@ int Game::startGame() {
 
 }
 
-int Game::getScreen_width() const {
-    return screen_width;
-}
-
-void Game::setScreen_width(int screen_width) {
-    Game::screen_width = screen_width;
-}
-
-int Game::getScreen_height() const {
-    return screen_height;
-}
-
-void Game::setScreen_height(int screen_height) {
-    Game::screen_height = screen_height;
-}

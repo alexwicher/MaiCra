@@ -1,7 +1,3 @@
-//
-// Created by alex on 7/12/20.
-//
-
 #ifndef MAICRA_WINDOW_H
 #define MAICRA_WINDOW_H
 

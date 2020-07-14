@@ -79,6 +79,14 @@ SDL_Window *Window::create_window() {
     loadGlad();
 
     SetOpenGLAttributes();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_COLOR_MATERIAL);
+
     int w,h;
     SDL_GetWindowSize(mainwindow, &w, &h);
     glViewport(0, 0, w, h);

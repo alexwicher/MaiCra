@@ -2,15 +2,16 @@
 #define MAICRA_CONTROL_H
 
 
+#include "../Camera/Camera.h"
+
 class Control {
 private:
-    bool mouseIn = false;
+    bool mouseIn;
 public:
     Control();
-public:
-    void handleKeyBoard();
-    void handleMouse(SDL_Window *win);
 
+public:
+    void handleCamera(Camera * camera,bool * loop, SDL_Window *window);
 };
 
 

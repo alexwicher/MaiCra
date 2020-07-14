@@ -20,6 +20,5 @@ add_executable(
         MapLoader/MapLoader.cpp MapLoader/MapLoader.h
         Resources/cubes/cubeTypes.h
         Resources/textures/textureTypes.h
-        Control/Control.cpp Control/Control.h
-        gameSettings.h gameSettings.cpp)
+        gameSettings.h gameSettings.cpp Control/Control.cpp Control/Control.h Resources/cubes/cubeTypes.cpp Resources/textures/textureTypes.cpp OpenCLErrorCodesChecker/OpenCLErrorCodesChecker.cpp OpenCLErrorCodesChecker/OpenCLErrorCodesChecker.h)
 
