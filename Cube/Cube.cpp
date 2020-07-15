@@ -3,48 +3,61 @@
 #include "../Renderer/Renderer.h"
 
 Cube::Cube(float offx, float offy, float offz, std::array<unsigned int, 6> textures, float s) : offx(offx), offy(offy),
-                                                                                          offz(offz), s(s),
+                                                                                                offz(offz), s(s),
                                                                                                 textures(textures) {
 
-    renderFace = {true,true,true,true,true,true};
-    std::array<float, 20> front = {
+    renderFace = {true, true, true, true, true, true};
+    std::array<float, 36> front = {
             -s + offx, s + offy, -s + offz, 0.0f, 1.0f,  //F-A -s s 0
+            s + offx, s + offy, -s + offz, 1.0f, 1.0f,  //F-B s s 1
+            -s + offx, -s + offy, -s + offz, 0.0f, 0.0f,  //F-D -s -s 3
             s + offx, s + offy, -s + offz, 1.0f, 1.0f,  //F-B s s 1
             s + offx, -s + offy, -s + offz, 1.0f, 0.0f,  //F-C s -s 2
             -s + offx, -s + offy, -s + offz, 0.0f, 0.0f  //F-D -s -s 3
     };
-    std::array<float, 20> back = {
+    std::array<float, 36> back = {
             -s + offx, s + offy, s + offz, 0.0f, 1.0f, //B-A -s s 4
+            s + offx, s + offy, s + offz, 1.0f, 1.0f,  //B-B s s 5
+            -s + offx, -s + offy, s + offz, 0.0f, 0.0f,  //B-D -s -s 7
             s + offx, s + offy, s + offz, 1.0f, 1.0f,  //B-B s s 5
             s + offx, -s + offy, s + offz, 1.0f, 0.0f, //B-C s- s 6
             -s + offx, -s + offy, s + offz, 0.0f, 0.0f  //B-D -s -s 7
     };
-    std::array<float, 20> right = {
+    std::array<float, 36> right = {
             s + offx, s + offy, -s + offz, 0.0f, 1.0f, //F-B
+            s + offx, s + offy, s + offz, 1.0f, 1.0f, //B-B
+            s + offx, -s + offy, -s + offz, 0.0f, 0.0f,  //F-C
             s + offx, s + offy, s + offz, 1.0f, 1.0f, //B-B
             s + offx, -s + offy, s + offz, 1.0f, 0.0f, //B-C
             s + offx, -s + offy, -s + offz, 0.0f, 0.0f  //F-C
     };
-    std::array<float, 20> left = {
+    std::array<float, 36> left = {
             -s + offx, s + offy, s + offz, 0.0f, 1.0f, //B-A
+            -s + offx, s + offy, -s + offz, 1.0f, 1.0f, //F-A
+            -s + offx, -s + offy, s + offz, 0.0f, 0.0f,  //B-D
             -s + offx, s + offy, -s + offz, 1.0f, 1.0f, //F-A
             -s + offx, -s + offy, -s + offz, 1.0f, 0.0f, //F-D
             -s + offx, -s + offy, s + offz, 0.0f, 0.0f  //B-D
     };
-    std::array<float, 20> top = {
+    std::array<float, 36> top = {
             -s + offx, s + offy, s + offz, 0.0f, 1.0f, //B-A
+            s + offx, s + offy, s + offz, 1.0f, 1.0f, //B-B
+            -s + offx, s + offy, -s + offz, 0.0f, 0.0f,  //F-A
             s + offx, s + offy, s + offz, 1.0f, 1.0f, //B-B
             s + offx, s + offy, -s + offz, 1.0f, 0.0f, //F-B
             -s + offx, s + offy, -s + offz, 0.0f, 0.0f  //F-A
     };
-    std::array<float, 20> bottom = {
+    std::array<float, 36> bottom = {
             -s + offx, -s + offy, -s + offz, 0.0f, 1.0f,//F-D
+            s + offx, -s + offy, -s + offz, 1.0f, 1.0f,//F-C
+            -s + offx, -s + offy, s + offz, 0.0f, 0.0f, //B-D
             s + offx, -s + offy, -s + offz, 1.0f, 1.0f,//F-C
             s + offx, -s + offy, s + offz, 1.0f, 0.0f,//B-C
             -s + offx, -s + offy, s + offz, 0.0f, 0.0f //B-D
     };
     cubeMap = {front, back, right, left, top, bottom};
 }
+
 const std::array<unsigned int, 6> &Cube::getCubeVAO() const {
     return cubeVAO;
 }
@@ -53,7 +66,7 @@ const std::array<unsigned int, 6> &Cube::getTextures() const {
     return textures;
 }
 
-void Cube::initCubeBuffers(){
+void Cube::initCubeBuffers() {
     for (int i = 0; i < cubeMap.size(); ++i) {
         if (renderFace[i])
             cubeVAO[i] = initVertexBuffs(cubeMap[i]);
@@ -62,7 +75,7 @@ void Cube::initCubeBuffers(){
     }
 }
 
-unsigned int Cube::initVertexBuffs(std::array<float, 20> squareMap) {
+unsigned int Cube::initVertexBuffs(std::array<float, 36> squareMap) {
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -86,9 +99,5 @@ unsigned int Cube::initVertexBuffs(std::array<float, 20> squareMap) {
 
 
     return VAO;
-}
-
-const std::array<std::array<float, 20>, 6> &Cube::getCubeMap() const {
-    return cubeMap;
 }
 
