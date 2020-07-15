@@ -14,11 +14,17 @@ add_executable(
         Window/Window.cpp Window/Window.h
         Shader/ShaderLoader.cpp Shader/ShaderLoader.h
         Cube/Cube.cpp Cube/Cube.h
-        Textures/Texture.cpp Textures/Texture.h
+        TextureLoader/TextureLoader.cpp TextureLoader/TextureLoader.h
         Renderer/Renderer.cpp Renderer/Renderer.h
         Camera/Camera.cpp Camera/Camera.h
         MapLoader/MapLoader.cpp MapLoader/MapLoader.h
         Resources/cubes/cubeTypes.h
         Resources/textures/textureTypes.h
-        gameSettings.h gameSettings.cpp Control/Control.cpp Control/Control.h Resources/cubes/cubeTypes.cpp Resources/textures/textureTypes.cpp OpenCLErrorCodesChecker/OpenCLErrorCodesChecker.cpp OpenCLErrorCodesChecker/OpenCLErrorCodesChecker.h)
+        gameSettings.h gameSettings.cpp
+        Control/Control.cpp Control/Control.h
+        Resources/cubes/cubeTypes.cpp Resources/textures/textureTypes.cpp
+        Chunk/Chunk.cpp Chunk/Chunk.h
+        Chunk/Mesh/Vertex.cpp Chunk/Mesh/Vertex.h
+        Chunk/Mesh/Texture.cpp Chunk/Mesh/Texture.h
+        Chunk/Mesh/Mesh.cpp Chunk/Mesh/Mesh.h)
 

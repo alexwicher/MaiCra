@@ -1,10 +1,12 @@
 #include "Cube.h"
-#include "../Textures/Texture.h"
+#include "../TextureLoader/TextureLoader.h"
 #include "../Renderer/Renderer.h"
 
 Cube::Cube(float offx, float offy, float offz, std::array<unsigned int, 6> textures, float s) : offx(offx), offy(offy),
                                                                                           offz(offz), s(s),
                                                                                                 textures(textures) {
+
+    renderFace = {true,true,true,true,true,true};
     std::array<float, 20> front = {
             -s + offx, s + offy, -s + offz, 0.0f, 1.0f,  //F-A -s s 0
             s + offx, s + offy, -s + offz, 1.0f, 1.0f,  //F-B s s 1
@@ -42,7 +44,6 @@ Cube::Cube(float offx, float offy, float offz, std::array<unsigned int, 6> textu
             -s + offx, -s + offy, s + offz, 0.0f, 0.0f //B-D
     };
     cubeMap = {front, back, right, left, top, bottom};
-    cubeVAO = Renderer().initVertexBuffs(cubeMap);
 }
 const std::array<unsigned int, 6> &Cube::getCubeVAO() const {
     return cubeVAO;
@@ -51,3 +52,44 @@ const std::array<unsigned int, 6> &Cube::getCubeVAO() const {
 const std::array<unsigned int, 6> &Cube::getTextures() const {
     return textures;
 }
+
+void Cube::initCubeBuffers(){
+    unsigned int noBuff = std::numeric_limits<unsigned int>::max();
+    for (int i = 0; i < cubeMap.size(); ++i) {
+        if (renderFace[i])
+            cubeVAO[i] = initVertexBuffs(cubeMap[i]);
+        else
+            cubeVAO[i] = noBuff;
+    }
+}
+
+unsigned int Cube::initVertexBuffs(std::array<float, 20> squareMap) {
+    unsigned int VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, squareMap.size() * sizeof(float), &squareMap[0], GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
+    glEnableVertexAttribArray(0);
+
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+
+    return VAO;
+}
+
+const std::array<std::array<float, 20>, 6> &Cube::getCubeMap() const {
+    return cubeMap;
+}
+

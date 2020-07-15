@@ -7,19 +7,28 @@
 
 
 #include <array>
+#include <glm/vec3.hpp>
 
 class Cube {
 private:
-    float s = 0.5f;
-    float offx, offy, offz;
+    std::array<unsigned int, 6> cubeVAO;
+
     std::array<std::array<float, 20>, 6> cubeMap;
     std::array<unsigned int, 6> textures;
+
+    unsigned int initVertexBuffs(std::array<float, 20> squareMap);
+
 public:
+    float offx, offy, offz, s = 0.5f;
+    std::array<bool, 6> renderFace;
+
+
+    void initCubeBuffers();
+
+    const std::array<std::array<float, 20>, 6> &getCubeMap() const;
+
     const std::array<unsigned int, 6> &getTextures() const;
 
-private:
-    std::array<unsigned int, 6> cubeVAO;
-public:
     const std::array<unsigned int, 6> &getCubeVAO() const;
 
     Cube(float offx, float offy, float offz, std::array<unsigned int, 6> textures, float s = 0.5f);

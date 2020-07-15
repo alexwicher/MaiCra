@@ -2,7 +2,7 @@
 // Created by alex on 7/12/20.
 //
 
-#include "Texture.h"
+#include "TextureLoader.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -11,7 +11,7 @@
 #include <iostream>
 #include <array>
 
-std::array<unsigned int, 6> Texture::loadCube(std::array<char *, 6> cubeType) {
+std::array<unsigned int, 6> TextureLoader::loadCube(std::array<char *, 6> cubeType) {
     std::array<unsigned int, 6> texIDsList{};
     std::string path = "../Resources/textures/";
     std::string previous;
@@ -53,7 +53,7 @@ std::array<unsigned int, 6> Texture::loadCube(std::array<char *, 6> cubeType) {
 
 }
 
-unsigned int Texture::loadCubemap(std::array<char *, 6> faces) {
+unsigned int TextureLoader::loadCubemap(std::array<char *, 6> faces) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

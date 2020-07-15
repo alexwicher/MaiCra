@@ -8,7 +8,7 @@
 
 #include <array>
 
-class Texture {
+class TextureLoader {
 public:
     std::array<unsigned  int, 6> loadCube(std::array<char *, 6> cubeType);
     unsigned int loadCubemap(std::array<char*, 6> faces);

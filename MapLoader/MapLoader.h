@@ -2,6 +2,7 @@
 #define MAICRA_MAPLOADER_H
 
 #include <vector>
+#include <unordered_map>
 #include "../Cube/Cube.h"
 #include "../Camera/Camera.h"
 #include "../Shader/ShaderLoader.h"
@@ -14,13 +15,19 @@ private:
     Control controls;
     Camera cam;
     ShaderLoader mapShader;
-    Cube * cubeList;
-    int mapX,mapY;
+    std::unordered_map<std::string, Cube *> cubeList;
+    int mapX, mapY, mapZ;
+
+    void cleanCubes();
+
 public:
-    MapLoader(Camera cam, ShaderLoader mapShader,Cube * cubeList,int mapY,int mapX);
-    void loadDumbMap(int x, int y);
+    MapLoader(Camera cam, ShaderLoader mapShader, std::unordered_map<std::string, Cube *> cubeList);
+
+    void loadDumbMap();
+
     void initMap(glm::vec3 pos);
-    void handleControls(bool *  loop,SDL_Window * window);
+
+    void handleControls(bool *loop, SDL_Window *window);
 
 };
 

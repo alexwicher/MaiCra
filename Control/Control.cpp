@@ -44,4 +44,6 @@ void Control::handleCamera(Camera *camera, bool *loop, SDL_Window *window) {
 
 Control::Control(){
     mouseIn = true;
+    SDL_ShowCursor(SDL_DISABLE);
+
 }
