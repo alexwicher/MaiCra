@@ -54,12 +54,11 @@ const std::array<unsigned int, 6> &Cube::getTextures() const {
 }
 
 void Cube::initCubeBuffers(){
-    unsigned int noBuff = std::numeric_limits<unsigned int>::max();
     for (int i = 0; i < cubeMap.size(); ++i) {
         if (renderFace[i])
             cubeVAO[i] = initVertexBuffs(cubeMap[i]);
         else
-            cubeVAO[i] = noBuff;
+            cubeVAO[i] = 0;
     }
 }
 

@@ -26,6 +26,8 @@ void MapLoader::initMap(glm::vec3 pos) {
     cam.setPos(pos);
     controls = Control();
     cleanCubes();
+
+
     for (std::pair<std::string, Cube *> hash : cubeList) {
         Cube *cube = hash.second;
         cube->initCubeBuffers();
@@ -46,20 +48,23 @@ MapLoader::MapLoader(Camera cam, ShaderLoader mapShader, std::unordered_map<std:
 void MapLoader::cleanCubes() {
     for (std::pair<std::string, Cube *> hash : cubeList) {
         Cube *cube = hash.second;
-        float x = cube->offx, y = cube->offy, z = cube->offz, s = cube->s * 2;
+        int x = static_cast<int>(cube->offx),
+                y = static_cast<int>(cube->offy),
+                z = static_cast<int>(cube->offz),
+                s = static_cast<int>(cube->s * 2);
 
         std::array<std::string, 6> checkSurroundings = {
-                std::to_string((int)x) + std::to_string((int)y) + std::to_string((int)(z - s)),
-                std::to_string((int)x) + std::to_string((int)y) + std::to_string((int)(z + s)),
-                std::to_string((int)(x + s)) + std::to_string((int)y) + std::to_string((int)z),
-                std::to_string((int)(x - s)) + std::to_string((int)y) + std::to_string((int)z),
-                std::to_string((int)x) + std::to_string((int)(y + s)) + std::to_string((int)z),
-                std::to_string((int)x) + std::to_string((int)(y - s)) + std::to_string((int)z),
+                std::to_string(x) + "x" + std::to_string(y) + "y" + std::to_string(z - s) + "z", //front
+                std::to_string(x) + "x" + std::to_string(y) + "y" + std::to_string(z + s) + "z", //back
+                std::to_string(x + s) + "x" + std::to_string(y) + "y" + std::to_string(z) + "z", //right
+                std::to_string(x - s) + "x" + std::to_string(y) + "y" + std::to_string(z) + "z", //left
+                std::to_string(x) + "x" + std::to_string(y + s) + "y" + std::to_string(z) + "z", //top
+                std::to_string(x) + "x" + std::to_string(y - s) + "y" + std::to_string(z) + "z", //bottom
         };
 
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 6; ++i)
             cube->renderFace[i] = cubeList.find(checkSurroundings[i]) == cubeList.end();
-        }
+
     }
 }
 

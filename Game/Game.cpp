@@ -21,11 +21,11 @@ int Game::startGame() {
     std::unordered_map<std::string, Cube*> flatRetardedMap;
     std::array<unsigned int, 6> textures = TextureLoader().loadCube(GRASS_BLOCK);
 
-    int x = 80, y = 1, z =80;
+    int x = 1, y = 1, z = 1;
     for (int i = 0; i < x; ++i) {
         for (int k = 0; k < y; ++k) {
             for (int j = 0; j < z; ++j) {
-                flatRetardedMap[std::to_string(i) + std::to_string(k) + std::to_string(j)] = new Cube(i, k, j, textures);
+                flatRetardedMap[std::to_string(i) + "x"+ std::to_string(k) + "y"+ std::to_string(j)+ "z"] = new Cube(i, k, j, textures);
             }
         }
     }
@@ -34,7 +34,7 @@ int Game::startGame() {
                                                const_cast<char *>("../Shader/rtsShader.frag")),
                                   flatRetardedMap);
 
-    dumbMap.initMap(glm::vec3(0, 0, 0));
+    dumbMap.initMap(glm::vec3(0, 1, -0.1));
 
 
     //Main loop ...

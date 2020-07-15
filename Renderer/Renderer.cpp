@@ -8,7 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 void
-Renderer::renderCube(std::array<unsigned int, 6> VAOList, std::array<unsigned int, 6> textures, ShaderLoader shader,Camera camera) {
+Renderer::renderCube(std::array<unsigned int, 6> VAOList, std::array<unsigned int, 6> textures, ShaderLoader shader,
+                     Camera camera) {
     shader.use();
     glm::mat4 projection = camera.getProjection();
     shader.setMat4("projection", projection);
@@ -19,7 +20,7 @@ Renderer::renderCube(std::array<unsigned int, 6> VAOList, std::array<unsigned in
 
     for (int i = 0; i < 6; ++i) {
         unsigned int texID = textures[i], VAO = VAOList[i];
-        if (VAO !=std::numeric_limits<unsigned int>::max()) {
+        if (VAO != 0) {
             glBindTexture(GL_TEXTURE_2D, texID);
             glBindVertexArray(VAO);
             glDrawArrays(GL_POLYGON, 0, 4);
