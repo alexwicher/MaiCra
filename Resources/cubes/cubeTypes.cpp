@@ -8,3 +8,11 @@ std::array<char *, 6> GRASS_BLOCK = {
         GRASS,
         DIRT
 };
+std::array<char *, 6> DEV_BLOCK = {
+        ONE,
+        TWO,
+        THREE,
+        FOUR,
+        FIVE,
+        SIX
+};

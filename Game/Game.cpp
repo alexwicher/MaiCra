@@ -21,7 +21,7 @@ int Game::startGame() {
     std::unordered_map<std::string, Cube*> flatRetardedMap;
     std::array<unsigned int, 6> textures = TextureLoader().loadCube(GRASS_BLOCK);
 
-    int x = 1, y = 1, z = 1;
+    int x = 16, y = 20, z =16;
     for (int i = 0; i < x; ++i) {
         for (int k = 0; k < y; ++k) {
             for (int j = 0; j < z; ++j) {
