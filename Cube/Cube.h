@@ -13,10 +13,10 @@ class Cube {
 private:
     std::array<unsigned int, 6> cubeVAO;
 
-    std::array<std::array<float, 30>, 6> cubeMap;
+    std::array<std::array<float, 20>, 6> cubeMap;
     std::array<unsigned int, 6> textures;
 
-    unsigned int initVertexBuffs(std::array<float, 30> squareMap);
+    unsigned int initVertexBuffs(std::array<float, 20> squareMap);
 
 public:
     float offx, offy, offz, s = 0.5f;
@@ -25,7 +25,7 @@ public:
 
     void initCubeBuffers();
 
-    const std::array<std::array<float, 30>, 6> &getCubeMap() const;
+    const std::array<std::array<float, 20>, 6> &getCubeMap() const;
 
     const std::array<unsigned int, 6> &getTextures() const;
 

@@ -11,7 +11,7 @@ public:
     Control();
 
 public:
-    void handleCamera(Camera * camera,bool * loop, SDL_Window *window);
+    void handleCamera(Camera * camera,bool * loop, SDL_Window *window, float deltaTime);
 };
 
 

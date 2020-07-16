@@ -15,8 +15,8 @@ void MapLoader::loadDumbMap() {
     }
 }
 
-void MapLoader::handleControls(bool *loop, SDL_Window *window) {
-    controls.handleCamera(&cam, loop, window);
+void MapLoader::handleControls(bool *loop, SDL_Window *window, float deltaTime) {
+    controls.handleCamera(&cam, loop, window,deltaTime);
 }
 
 void MapLoader::initMap(glm::vec3 pos) {

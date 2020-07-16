@@ -20,8 +20,7 @@ int Game::startGame() {
     SDL_Window *window = win.create_window();
     std::unordered_map<std::string, Cube*> flatRetardedMap;
     std::array<unsigned int, 6> textures = TextureLoader().loadCube(GRASS_BLOCK);
-
-    int x = 16, y = 20, z =16;
+    int x = 80, y =1, z =80;
     for (int i = 0; i < x; ++i) {
         for (int k = 0; k < y; ++k) {
             for (int j = 0; j < z; ++j) {
@@ -34,21 +33,20 @@ int Game::startGame() {
                                                const_cast<char *>("../Shader/rtsShader.frag")),
                                   flatRetardedMap);
 
-    dumbMap.initMap(glm::vec3(0, 1, -0.1));
+    dumbMap.initMap(glm::vec3(x/2, y+2, z/2));
 
 
     //Main loop ...
     bool loop = true;
-    uint32_t ticks, lastticks = 0;
+    unsigned int lastFrame = 0,deltaTime = 0;	// time between current frame and last frame
     while (loop) {
+        unsigned int currentFrame = SDL_GetTicks();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-        dumbMap.handleControls(&loop, window);
+        dumbMap.handleControls(&loop, window,deltaTime);
         dumbMap.loadDumbMap();
 
-        ticks = SDL_GetTicks();
-        if (((ticks * 10 - lastticks * 10)) < 167) //60 MAX FPS
-            SDL_Delay((167 - ((ticks * 10 - lastticks * 10))) / 10);
-        lastticks = SDL_GetTicks();
 
         SDL_GL_SwapWindow(window);
     }

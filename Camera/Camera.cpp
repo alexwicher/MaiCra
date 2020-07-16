@@ -22,20 +22,20 @@ Camera::Camera(const glm::vec3 &pos) : pos(pos) {
 
 }
 
-void Camera::moveBackward() {
-    pos -= CAM_SPEED * front;
+void Camera::moveBackward(float deltaTime) {
+    pos -= (deltaTime * CAM_SPEED) * front;
 }
 
-void Camera::moveLeft() {
-    pos -= right * CAM_SPEED;
+void Camera::moveLeft(float deltaTime) {
+    pos -= (deltaTime * CAM_SPEED) * right;
 }
 
-void Camera::moveFoward() {
-    pos += CAM_SPEED * front;
+void Camera::moveFoward(float deltaTime) {
+    pos += (deltaTime * CAM_SPEED) * front;
 }
 
-void Camera::moveRight() {
-    pos += right * CAM_SPEED;
+void Camera::moveRight(float deltaTime) {
+    pos += (deltaTime * CAM_SPEED) * right;
 }
 
 

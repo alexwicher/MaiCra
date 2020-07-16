@@ -27,7 +27,7 @@ public:
 
     void initMap(glm::vec3 pos);
 
-    void handleControls(bool *loop, SDL_Window *window);
+    void handleControls(bool *loop, SDL_Window *window, float deltaTime);
 
 };
 

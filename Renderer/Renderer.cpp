@@ -23,7 +23,7 @@ Renderer::renderCube(std::array<unsigned int, 6> VAOList, std::array<unsigned in
         if (VAO != 0) {
             glBindTexture(GL_TEXTURE_2D, texID);
             glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
         }
     }
 }

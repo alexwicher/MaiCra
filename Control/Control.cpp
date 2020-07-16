@@ -4,19 +4,19 @@
 #include "Control.h"
 #include "../Camera/Camera.h"
 
-void Control::handleCamera(Camera *camera, bool *loop, SDL_Window *window) {
+void Control::handleCamera(Camera *camera, bool *loop, SDL_Window *window, float deltaTime) {
     const Uint8 *keyboard = SDL_GetKeyboardState(nullptr);
     if (keyboard[SDL_SCANCODE_W]) {
-        camera->moveFoward();
+        camera->moveFoward(deltaTime);
     }
     if (keyboard[SDL_SCANCODE_S]) {
-        camera->moveBackward();
+        camera->moveBackward(deltaTime);
     }
     if (keyboard[SDL_SCANCODE_A]) {
-        camera->moveLeft();
+        camera->moveLeft(deltaTime);
     }
     if (keyboard[SDL_SCANCODE_D]) {
-        camera->moveRight();
+        camera->moveRight(deltaTime);
     }
     if (keyboard[SDL_SCANCODE_F12]) {
         *loop = false;

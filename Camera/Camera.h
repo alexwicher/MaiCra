@@ -30,10 +30,10 @@ public:
 
     void motion(float x,float y,SDL_Window * window);
 
-    void moveFoward();
-    void moveBackward();
-    void moveLeft();
-    void moveRight();
+    void moveFoward(float deltaTime);
+    void moveBackward(float deltaTime);
+    void moveLeft(float deltaTime);
+    void moveRight(float deltaTime);
 
     glm::mat4 getView();
     glm::mat4 getProjection();
