@@ -9,7 +9,7 @@ glm::mat4 Camera::getView() {
 }
 
 glm::mat4 Camera::getProjection() {
-    return glm::perspective(glm::radians(FOV), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+    return glm::perspective(glm::radians(FOV), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, LINE_OF_SIGHT);
 }
 
 Camera::Camera(const glm::vec3 &pos) : pos(pos) {

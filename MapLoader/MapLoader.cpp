@@ -4,8 +4,11 @@
 #include "MapLoader.h"
 #include "../Resources/cubes/cubeTypes.h"
 #include "../Renderer/Renderer.h"
+#include "../gameSettings.h"
+#include <stdio.h>
 
-void MapLoader::loadDumbMap() {
+
+void MapLoader::loadMap() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -16,7 +19,7 @@ void MapLoader::loadDumbMap() {
 }
 
 void MapLoader::handleControls(bool *loop, SDL_Window *window, float deltaTime) {
-    controls.handleCamera(&cam, loop, window,deltaTime);
+    controls.handleCamera(&cam, loop, window, deltaTime);
 }
 
 void MapLoader::initMap(glm::vec3 pos) {

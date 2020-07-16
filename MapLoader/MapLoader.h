@@ -19,11 +19,12 @@ private:
     int mapX, mapY, mapZ;
 
     void cleanCubes();
+    bool lineOfSight(Cube * cube);
 
 public:
     MapLoader(Camera cam, ShaderLoader mapShader, std::unordered_map<std::string, Cube *> cubeList);
 
-    void loadDumbMap();
+    void loadMap();
 
     void initMap(glm::vec3 pos);
 
