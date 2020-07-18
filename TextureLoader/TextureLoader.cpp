@@ -3,6 +3,7 @@
 //
 
 #include "TextureLoader.h"
+#include "../Resources/textures/textureTypes.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -10,72 +11,93 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <array>
-
-std::array<unsigned int, 6> TextureLoader::loadCube(std::array<char *, 6> cubeType) {
-    std::array<unsigned int, 6> texIDsList{};
-    std::string path = "../Resources/textures/";
-    std::string previous;
-    unsigned int texture = 0;
-
-    for (int i = 0; i < cubeType.size(); i++) {
-        std::string type(cubeType[i]);
-        if (previous != type) {
-            glGenTextures(1, &texture);
-            glBindTexture(GL_TEXTURE_2D, texture);
-            // set the texture wrapping parameters
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            // set texture filtering parameters
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            // load image, create texture and generate mipmaps
-            int width=0, height=0, nrChannels=0;
-            stbi_set_flip_vertically_on_load(true);
-            std::string fullPath = path;
-            unsigned char *data = stbi_load(fullPath.append(type).data(), &width, &height, &nrChannels, STBI_rgb_alpha);
-            if (data) {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-                glGenerateMipmap(GL_TEXTURE_2D);
-            } else {
-                std::cout << "Failed to load texture" << std::endl;
-            }
-            stbi_image_free(data);
-            previous = type;
-            glBindTexture(GL_TEXTURE_2D, 0);
+void glErrors() {
+    GLenum errorCode;
+    while ((errorCode = glGetError()) != GL_NO_ERROR) {
+        std::string error;
+        switch (errorCode) {
+            case GL_INVALID_ENUM:
+                error = "INVALID_ENUM";
+                break;
+            case GL_INVALID_VALUE:
+                error = "INVALID_VALUE";
+                break;
+            case GL_INVALID_OPERATION:
+                error = "INVALID_OPERATION";
+                break;
+            case GL_STACK_OVERFLOW:
+                error = "STACK_OVERFLOW";
+                break;
+            case GL_STACK_UNDERFLOW:
+                error = "STACK_UNDERFLOW";
+                break;
+            case GL_OUT_OF_MEMORY:
+                error = "OUT_OF_MEMORY";
+                break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                error = "INVALID_FRAMEBUFFER_OPERATION";
+                break;
         }
-        texIDsList[i] = texture;
-
+        std::cout << error << std::endl;
     }
-
-
-    return texIDsList;
-
-
 }
 
-unsigned int TextureLoader::loadCubemap(std::array<char *, 6> faces) {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+unsigned int TextureLoader::loadCubeTextures() {
+    std::string path = "../Resources/textures/";
+    std::string previous;
+    int w = 0, h = 0, cha = 0;
+    unsigned int texture = 0;
+    stbi_info((path+TEX_LIST[0]).data(), &w, &h, &cha);
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY,
+                 0,                // level
+                 GL_RGBA8,         // Internal format
+                 w, h, TEX_LIST.size(), // width,height,depth
+                 0,                // border?
+                 GL_RGBA,          // format
+                 GL_UNSIGNED_BYTE, // type
+                 nullptr);               // pointer to data
 
-    int width, height, nrChannels;
-    for (unsigned int i = 0; i < faces.size(); i++) {
-        unsigned char *data = stbi_load(faces[i], &width, &height, &nrChannels, 0);
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+
+    std::array<unsigned char *, TEX_LIST.size()> dataArray{};
+    for (int i = 0;i<TEX_LIST.size();i++) {
+        stbi_set_flip_vertically_on_load(true);
+        unsigned char *data = stbi_load((path+TEX_LIST[i]).data(), &w, &h, &cha, STBI_rgb_alpha);
         if (data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                         0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-            );
-            stbi_image_free(data);
-        } else {
-            std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
-            stbi_image_free(data);
-        }
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                glTexSubImage3D(GL_TEXTURE_2D_ARRAY,    // GL_TEXTURE_2D_ARRAY
+                    0,                    // mipmap level to load
+                    0,                    // offset in an existing texture to load to
+                    0,                    // offset in an existing texture to load to
+                    i,                    // first array slice to load to (zoffset)
+                    w,                    // width of data to be loaded
+                    h,                    // height of data to be loaded
+                    1,                    // number of array slices to load
+                    GL_RGBA,                    // format of data to be loaded
+                    GL_UNSIGNED_BYTE,                    // type of data to be loaded
+                    data);         // pointer ro data to be loaded.    glErrors();
+            glErrors();
 
-    return textureID;
+        } else {
+            std::cout << "Failed to load texture" << std::endl;
+        }
+        stbi_image_free(data);
+    }
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+
+    return texture;
+
 }

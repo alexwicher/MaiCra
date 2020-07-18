@@ -42,11 +42,13 @@ bool loadGlad() {
         std::cout << "Failed to initialize OpenGL context" << std::endl;
         return false;
     }
+    int a;
+    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS,&a);
     printf("OpenGL loaded\n");
     printf("Vendor:   %s\n", glGetString(GL_VENDOR));
     printf("Renderer: %s\n", glGetString(GL_RENDERER));
     printf("Version:  %s\n", glGetString(GL_VERSION));
-
+    printf("GL_MAX_ARRAY_TEXTURE_LAYERS --> %i",a);
     return true;
 
 }
@@ -83,6 +85,7 @@ SDL_Window *Window::create_window() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_3D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_COLOR_MATERIAL);

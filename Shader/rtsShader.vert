@@ -1,9 +1,9 @@
 #version 130
 
 in vec3 position;
-in vec2 textCoords;
+in vec3 textCoords;
 
-out vec2 coords;
+out vec3 coords;
 
 uniform mat4 modelView;
 uniform mat4 projection;

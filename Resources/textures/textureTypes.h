@@ -1,5 +1,6 @@
-#include <string>
+#include <array>
 
+extern std::array<const char *,9> TEX_LIST;
 extern char *DIRT;
 extern char *GRASS;
 extern char *GRASS_SIDE;
