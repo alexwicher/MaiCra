@@ -1,7 +1,3 @@
-//
-// Created by alex on 7/12/20.
-//
-
 #ifndef MAICRA_CUBE_H
 #define MAICRA_CUBE_H
 
@@ -11,27 +7,23 @@
 
 class Cube {
 private:
-    std::array<unsigned int, 6> cubeVAO;
+    std::array<bool, 6> renderFace;
+    std::array<unsigned int, 6> textureArrayIndexs;
 
-    std::array<std::array<float, 20>, 6> cubeMap;
-    std::array<unsigned int, 6> textures;
-
-    unsigned int initVertexBuffs(std::array<float, 20> squareMap);
 
 public:
-    float offx, offy, offz, s = 0.5f;
-    std::array<bool, 6> renderFace;
+    std::array<char *, 6> cubeType;
+
+    Cube(const std::array<char *, 6> &cubeType, const glm::vec3 &cubPos);
 
 
-    void initCubeBuffers();
+    const std::array<bool, 6> &getRenderFace() const;
 
-    const std::array<std::array<float, 20>, 6> &getCubeMap() const;
+    void setRenderFace(const std::array<bool, 6> &renderFace);
 
-    const std::array<unsigned int, 6> &getTextures() const;
+    const std::array<unsigned int, 6> &getTextureArrayIndexs() const;
 
-    const std::array<unsigned int, 6> &getCubeVAO() const;
-
-    Cube(float offx, float offy, float offz, std::array<unsigned int, 6> textures, float s = 0.5f);
+    glm::vec3 cubPos;
 
 
 };

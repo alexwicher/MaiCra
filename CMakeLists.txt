@@ -8,7 +8,7 @@ SET(CMAKE_CXX_STANDARD_LIBRARIES "-lGL -lGLU -lX11 -lXxf86vm -lXrandr -lpthread 
 
 add_executable(
         MaiCra
-        glad.c
+        libs/glad/glad.c
         main.cpp
         Game/Game.cpp Game/Game.h
         Window/Window.cpp Window/Window.h
@@ -17,7 +17,6 @@ add_executable(
         TextureLoader/TextureLoader.cpp TextureLoader/TextureLoader.h
         Renderer/Renderer.cpp Renderer/Renderer.h
         Camera/Camera.cpp Camera/Camera.h
-        MapLoader/MapLoader.cpp MapLoader/MapLoader.h
         Resources/cubes/cubeTypes.h
         Resources/textures/textureTypes.h
         gameSettings.h gameSettings.cpp

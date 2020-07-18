@@ -1,6 +1,10 @@
 #include <array>
+#include <unordered_map>
 
-extern std::array<const char *,9> TEX_LIST;
+
+extern std::unordered_map<std::string,unsigned int> TEXTURE_INDEX_MAP;
+
+extern std::array<const char *,9> CUBES_TEX_LIST;
 extern char *DIRT;
 extern char *GRASS;
 extern char *GRASS_SIDE;

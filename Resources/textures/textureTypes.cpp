@@ -1,7 +1,8 @@
 #include <array>
 #include "textureTypes.h"
 
-std::array<const char *,9> TEX_LIST={DIRT,GRASS,GRASS_SIDE,ONE,TWO,THREE,FOUR,FIVE,SIX};
+std::unordered_map<std::string,unsigned int> TEXTURE_INDEX_MAP;
+std::array<const char *,9> CUBES_TEX_LIST={DIRT,GRASS,GRASS_SIDE,ONE,TWO,THREE,FOUR,FIVE,SIX};
 
 char *DIRT = const_cast<char *>("Dirt.png");
 char *GRASS = const_cast<char *>("Grass.png");
