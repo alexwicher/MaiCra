@@ -21,7 +21,7 @@ int Game::startGame() {
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::vector<Cube *> dumbMap;
-    int x = 1, y = 1, z = 1;
+    int x = 22, y = 2, z = 22;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             for (int k = 0; k < z; ++k) {

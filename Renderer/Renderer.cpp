@@ -26,7 +26,7 @@ void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader,
         unsigned int VAO = facesVAOs[i];
         glBindVertexArray(VAO);
         glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-        glDrawArraysInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, static_cast<GLsizei>(faceOffsets[i].size()));
+        glDrawElementsInstanced(GL_TRIANGLES,6,GL_UNSIGNED_SHORT,0,static_cast<GLsizei>(faceOffsets[i].size()));
     }
 }
 
@@ -79,8 +79,8 @@ void Renderer::initCubeInstancing(std::vector<Cube * > cubeList, ShaderLoader *s
     std::array<std::array<float, 20>, 6> cubeMap = {front, back, right, left, top, bottom};
 
     // Setting offsets up
-    for (unsigned int i = 0; i < cubeList.size(); i++) {
-        Cube cube = *cubeList[i];
+    for (auto &i : cubeList) {
+        Cube cube = *i;
         float offx = cube.cubPos.x, offy = cube.cubPos.y, offz = cube.cubPos.z;
         for (int j = 0; j < cube.getRenderFace().size(); ++j)
             if (cube.getRenderFace()[j])
@@ -111,11 +111,11 @@ void Renderer::initCubeInstancing(std::vector<Cube * > cubeList, ShaderLoader *s
 
         // position attribute
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
 
         //texture coord attribute
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *) (3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
 
         // also set instance data
         glEnableVertexAttribArray(2);
