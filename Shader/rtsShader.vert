@@ -1,8 +1,8 @@
-#version 130
+#version 450
 
-in vec3 position;
-in vec2 textCoords;
-in vec4 aOffset; // pos.xyz w == index in texture array
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 textCoords;
+layout (location = 2) in vec4 aOffset; // pos.xyz w == index in texture array
 
 out vec3 coords;
 

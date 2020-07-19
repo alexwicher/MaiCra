@@ -24,8 +24,8 @@ bool SetOpenGLAttributes() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
     // Turn on double buffering with a 24bit Z buffer.
     // You may need to change this to 16 or 32 for your system
@@ -88,7 +88,6 @@ SDL_Window *Window::create_window() {
     glEnable(GL_TEXTURE_3D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_COLOR_MATERIAL);
 
     int w,h;
     SDL_GetWindowSize(mainwindow, &w, &h);

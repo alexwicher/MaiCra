@@ -8,8 +8,8 @@ SET(CMAKE_CXX_STANDARD_LIBRARIES "-lGL -lGLU -lX11 -lXxf86vm -lXrandr -lpthread 
 
 add_executable(
         MaiCra
-        libs/glad/glad.c
         main.cpp
+        libs/glad/glad.c
         Game/Game.cpp Game/Game.h
         Window/Window.cpp Window/Window.h
         Shader/ShaderLoader.cpp Shader/ShaderLoader.h
