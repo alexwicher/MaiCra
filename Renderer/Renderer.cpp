@@ -26,15 +26,15 @@ void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader,
         unsigned int VAO = facesVAOs[i];
         glBindVertexArray(VAO);
         glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-        glDrawElementsInstanced(GL_TRIANGLES,6,GL_UNSIGNED_SHORT,0,static_cast<GLsizei>(faceOffsets[i].size()));
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
     }
 }
 
-void Renderer::initCubeInstancing(std::vector<Cube * > cubeList, ShaderLoader *shader) {
+void Renderer::initCubeInstancing(std::unordered_map<std::string, Cube *> cubeList, ShaderLoader *shader) {
 
     shader->use();
     shader->setInt("texture1", 0);
-    float s = 0.5;
+    float s = CUBE_SIZE;
     std::array<float, 20> front = {
             -s, s, -s, 0.0f, 1.0f,  //F-A -s s 0
             s, s, -s, 1.0f, 1.0f,  //F-B s s 1
@@ -77,13 +77,13 @@ void Renderer::initCubeInstancing(std::vector<Cube * > cubeList, ShaderLoader *s
     };
     std::array<std::vector<glm::vec4>, 6> offsets;
     std::array<std::array<float, 20>, 6> cubeMap = {front, back, right, left, top, bottom};
-
+    killUselessNeighbours(cubeList);
     // Setting offsets up
     for (auto &i : cubeList) {
-        Cube cube = *i;
+        Cube cube = *i.second;
         float offx = cube.cubPos.x, offy = cube.cubPos.y, offz = cube.cubPos.z;
-        for (int j = 0; j < cube.getRenderFace().size(); ++j)
-            if (cube.getRenderFace()[j])
+        for (int j = 0; j < cube.renderFace.size(); ++j)
+            if (cube.renderFace[j])
                 faceOffsets[j].emplace_back(glm::vec4(offx, offy, offz, cube.getTextureArrayIndexs()[j]));
     }
 
@@ -124,5 +124,29 @@ void Renderer::initCubeInstancing(std::vector<Cube * > cubeList, ShaderLoader *s
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glVertexAttribDivisor(2, 1); // tell OpenGL this is an instanced vertex attribute.
         facesVAOs[k] = VAO;
+    }
+}
+
+void Renderer::killUselessNeighbours(std::unordered_map<std::string, Cube *> cubeList) {
+    for (std::pair<std::string, Cube *> hash : cubeList) {
+        Cube *cube = hash.second;
+        int x = static_cast<int>(cube->cubPos.x),
+                y = static_cast<int>(cube->cubPos.y),
+                z = static_cast<int>(cube->cubPos.z),
+                s = static_cast<int>(CUBE_SIZE * 2);
+
+
+        std::array<std::string, 6> checkSurroundings = {
+                std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z - s), //front
+                std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z + s), //back
+                std::to_string(x + s) + "," + std::to_string(y) + "," + std::to_string(z), //right
+                std::to_string(x - s) + "," + std::to_string(y) + "," + std::to_string(z), //left
+                std::to_string(x) + "," + std::to_string(y + s) + "," + std::to_string(z), //top
+                std::to_string(x) + "," + std::to_string(y - s) + "," + std::to_string(z) //bottom
+        };
+
+        for (int i = 0; i < 6; ++i)
+            cube->renderFace[i] = cubeList.find(checkSurroundings[i]) == cubeList.end();
+
     }
 }

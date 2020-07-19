@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <GL/gl.h>
 
 
 void CheckSDLError(int line = -1) {
@@ -88,7 +89,6 @@ SDL_Window *Window::create_window() {
     glEnable(GL_TEXTURE_3D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     int w,h;
     SDL_GetWindowSize(mainwindow, &w, &h);
     glViewport(0, 0, w, h);

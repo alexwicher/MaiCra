@@ -13,19 +13,21 @@
 #include <unordered_map>
 #include <stb_image.h>
 
+std::string getKey(int x, int y, int z) {
+    return std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
+}
+
 int Game::startGame() {
-
-
     Window win = Window(screen_width, screen_height);
     SDL_Window *window = win.create_window();
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
-    std::vector<Cube *> dumbMap;
-    int x = 22, y = 2, z = 22;
+    std::unordered_map<std::string, Cube *> dumbMap;
+    int x = 128, y = 128, z = 128;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             for (int k = 0; k < z; ++k) {
-                dumbMap.emplace_back(new Cube(GRASS_BLOCK, glm::vec3(i, j, k)));
+                dumbMap[getKey(i,j,k)] = (new Cube(GRASS_BLOCK, glm::vec3(i, j, k)));
             }
         }
     }
@@ -34,7 +36,7 @@ int Game::startGame() {
 
 
     Control control = Control();
-    Camera camera = Camera(glm::vec3(0, 0, 0));
+    Camera camera = Camera(glm::vec3(x/2, y+1.5, z/2));
     Renderer renderCubes = Renderer();
     renderCubes.initCubeInstancing(dumbMap, &shader);
     bool loop = true;
