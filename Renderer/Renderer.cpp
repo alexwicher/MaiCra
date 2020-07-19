@@ -34,7 +34,7 @@ void Renderer::initCubeInstancing(std::vector<Cube * > cubeList, ShaderLoader *s
 
     shader->use();
     shader->setInt("texture1", 0);
-    float s = 1;
+    float s = 0.5;
     std::array<float, 20> front = {
             -s, s, -s, 0.0f, 1.0f,  //F-A -s s 0
             s, s, -s, 1.0f, 1.0f,  //F-B s s 1
