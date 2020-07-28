@@ -2,18 +2,15 @@
 #include "../Shader/ShaderLoader.h"
 #include "../gameSettings.h"
 #include "../Camera/Camera.h"
-#include "../Control/Control.h"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 
-void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader,
-                           Camera *camera, bool *loop, SDL_Window *window, unsigned int *deltaTime, Control *control) {
+void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader,Camera * camera) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    control->handleCamera(camera, loop, window, *deltaTime);
     shader->use();
     glm::mat4 projection = camera->getProjection();
     shader->setMat4("projection", projection);
@@ -30,7 +27,7 @@ void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader,
     }
 }
 
-void Renderer::initCubeInstancing(std::unordered_map<std::string, Cube *> cubeList, ShaderLoader *shader) {
+void Renderer::initCubeInstancing(ShaderLoader *shader) {
 
     shader->use();
     shader->setInt("texture1", 0);
@@ -85,6 +82,7 @@ void Renderer::initCubeInstancing(std::unordered_map<std::string, Cube *> cubeLi
         for (int j = 0; j < cube.renderFace.size(); ++j)
             if (cube.renderFace[j])
                 faceOffsets[j].emplace_back(glm::vec4(offx, offy, offz, cube.getTextureArrayIndexs()[j]));
+
     }
 
     for (int k = 0; k < cubeMap.size(); ++k) {
@@ -94,7 +92,7 @@ void Renderer::initCubeInstancing(std::unordered_map<std::string, Cube *> cubeLi
         // --------------------------------------
         glGenBuffers(1, &IBO);
         glBindBuffer(GL_ARRAY_BUFFER, IBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * faceOffsets[k].size(), &faceOffsets[k][0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * faceOffsets[k].size(), &faceOffsets[k][0], GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glGenVertexArrays(1, &VAO);
         // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -124,6 +122,7 @@ void Renderer::initCubeInstancing(std::unordered_map<std::string, Cube *> cubeLi
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glVertexAttribDivisor(2, 1); // tell OpenGL this is an instanced vertex attribute.
         facesVAOs[k] = VAO;
+        facesIBOs[k] = IBO;
     }
 }
 
@@ -150,3 +149,5 @@ void Renderer::killUselessNeighbours(std::unordered_map<std::string, Cube *> cub
 
     }
 }
+
+Renderer::Renderer(const std::unordered_map<std::string, Cube *> &cubeList) : cubeList(cubeList) {}

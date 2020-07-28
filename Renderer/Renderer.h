@@ -7,18 +7,23 @@
 #include "../Shader/ShaderLoader.h"
 #include "../Camera/Camera.h"
 #include "../Cube/Cube.h"
-#include "../Control/Control.h"
 
 class Renderer {
 private:
+public:
+    Renderer(const std::unordered_map<std::string, Cube *> &cubeList);
+
+private:
     std::array<unsigned int, 6> facesVAOs;
-    std::array<std::vector<glm::vec4>, 6> faceOffsets;
     void killUselessNeighbours(std::unordered_map<std::string, Cube *> cubeList);
 public:
-    void initCubeInstancing(std::unordered_map<std::string, Cube *> cubeList, ShaderLoader * shader);
+    std::array<std::vector<glm::vec4>, 6> faceOffsets;
+    std::unordered_map<std::string, Cube *> cubeList;
+    std::array<unsigned int, 6> facesIBOs;
 
-    void renderCubes(unsigned int textureArray, ShaderLoader *shader,
-                     Camera *camera, bool *loop, SDL_Window *window, unsigned int *deltaTime, Control *control);
+    void initCubeInstancing(ShaderLoader * shader);
+
+    void renderCubes(unsigned int textureArray, ShaderLoader *shader,Camera * camera);
 };
 
 

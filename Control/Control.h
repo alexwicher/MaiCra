@@ -3,6 +3,7 @@
 
 
 #include "../Camera/Camera.h"
+#include "../Renderer/Renderer.h"
 
 class Control {
 private:
@@ -12,6 +13,7 @@ public:
 
 public:
     void handleCamera(Camera * camera,bool * loop, SDL_Window *window, float deltaTime);
+    void handleRenderer(Renderer * renderer);
 };
 
 
