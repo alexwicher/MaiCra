@@ -2,13 +2,14 @@
 #include "../Shader/ShaderLoader.h"
 #include "../gameSettings.h"
 #include "../Camera/Camera.h"
+#include "../Cube/Cube.h"
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 
-void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader,Camera * camera) {
+void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shader->use();
@@ -151,3 +152,58 @@ void Renderer::killUselessNeighbours(std::unordered_map<std::string, Cube *> cub
 }
 
 Renderer::Renderer(const std::unordered_map<std::string, Cube *> &cubeList) : cubeList(cubeList) {}
+
+void Renderer::reloadIBO(unsigned int IBOid, std::vector<glm::vec4> *e) {
+    glBindBuffer(GL_ARRAY_BUFFER, IBOid);
+    std::vector<glm::vec4> deepCopy = *e;
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * deepCopy.size(), &deepCopy[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Renderer::deleteFace(glm::vec3 pos, int side) {
+    std::vector<glm::vec4> * sideBuffer = &faceOffsets[side];
+    for (int i = 0; i < sideBuffer->size(); i++) {
+        glm::vec4 vec =  faceOffsets[side][i];
+        if (pos == glm::vec3(vec.x, vec.y, vec.z)) {
+            sideBuffer->erase(sideBuffer->begin() + i);
+            reloadIBO(facesIBOs[side], sideBuffer);
+            break;
+        }
+    }
+}
+
+void Renderer::createFace(int x, int y, int z, int side) {
+    Cube *face = cubeList[std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z)];
+    face->renderFace[side] = true;
+    std::vector<glm::vec4> * off = &faceOffsets[side];
+    off->push_back(glm::vec4(x, y, z, face->getTextureArrayIndexs()[side]));
+    reloadIBO(facesIBOs[side], off);
+}
+
+
+void Renderer::addCube(Cube *cube) {
+
+}
+
+void Renderer::removeCube(Cube *cube) {
+    int x = static_cast<int>(cube->cubPos.x), y = static_cast<int>(cube->cubPos.y), z = static_cast<int>(cube->cubPos.z), s = static_cast<int>(
+            2 * CUBE_SIZE);
+    std::string key = std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
+    for (int i = 0; i < 6; i++) {
+        std::vector<glm::vec4> e = faceOffsets[i];
+        deleteFace(cube->cubPos, i);
+
+        if (!cube->renderFace[i]) {
+            int x_n = x, y_n = y, z_n = z, i_n = i % 2 == 0 ? i + 1 : i - 1;
+            if (i == 0 || i == 1)
+                z_n = i == 0 ? z - s : z + s;
+            if (i == 2 || i == 3)
+                x_n = i == 2 ? x + s : x - s;
+            if (i == 4 || i == 5)
+                y_n = i == 4 ? y + s : y - s;
+            createFace(x_n, y_n, z_n, i_n);
+        }
+
+        cubeList.erase(key);
+    }
+}

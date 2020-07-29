@@ -23,7 +23,7 @@ int Game::startGame() {
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::unordered_map<std::string, Cube *> dumbMap;
-    int x = 3, y = 1, z = 2;
+    int x = 2, y = 5, z = 2;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             for (int k = 0; k < z; ++k) {

@@ -8,6 +8,15 @@ std::array<char *, 6> GRASS_BLOCK = {
         GRASS,
         DIRT
 };
+
+std::array<char *, 6> DIRT_BLOCK = {
+        DIRT,
+        DIRT,
+        DIRT,
+        DIRT,
+        DIRT,
+        DIRT
+};
 std::array<char *, 6> DEV_BLOCK = {
         ONE,
         TWO,
