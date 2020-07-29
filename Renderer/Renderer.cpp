@@ -75,7 +75,9 @@ void Renderer::initCubeInstancing(ShaderLoader *shader) {
     };
     std::array<std::vector<glm::vec4>, 6> offsets;
     std::array<std::array<float, 20>, 6> cubeMap = {front, back, right, left, top, bottom};
-    killUselessNeighbours(cubeList);
+    for (std::pair<std::string, Cube *> hash : cubeList) {
+        killUselessNeighbours(hash.second);
+    }
     // Setting offsets up
     for (auto &i : cubeList) {
         Cube cube = *i.second;
@@ -127,28 +129,24 @@ void Renderer::initCubeInstancing(ShaderLoader *shader) {
     }
 }
 
-void Renderer::killUselessNeighbours(std::unordered_map<std::string, Cube *> cubeList) {
-    for (std::pair<std::string, Cube *> hash : cubeList) {
-        Cube *cube = hash.second;
-        int x = static_cast<int>(cube->cubPos.x),
-                y = static_cast<int>(cube->cubPos.y),
-                z = static_cast<int>(cube->cubPos.z),
-                s = static_cast<int>(CUBE_SIZE * 2);
+void Renderer::killUselessNeighbours(Cube *cube) {
+    int x = static_cast<int>(cube->cubPos.x),
+            y = static_cast<int>(cube->cubPos.y),
+            z = static_cast<int>(cube->cubPos.z),
+            s = static_cast<int>(CUBE_SIZE * 2);
 
 
-        std::array<std::string, 6> checkSurroundings = {
-                std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z - s), //front
-                std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z + s), //back
-                std::to_string(x + s) + "," + std::to_string(y) + "," + std::to_string(z), //right
-                std::to_string(x - s) + "," + std::to_string(y) + "," + std::to_string(z), //left
-                std::to_string(x) + "," + std::to_string(y + s) + "," + std::to_string(z), //top
-                std::to_string(x) + "," + std::to_string(y - s) + "," + std::to_string(z) //bottom
-        };
+    std::array<std::string, 6> checkSurroundings = {
+            std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z - s), //front
+            std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z + s), //back
+            std::to_string(x + s) + "," + std::to_string(y) + "," + std::to_string(z), //right
+            std::to_string(x - s) + "," + std::to_string(y) + "," + std::to_string(z), //left
+            std::to_string(x) + "," + std::to_string(y + s) + "," + std::to_string(z), //top
+            std::to_string(x) + "," + std::to_string(y - s) + "," + std::to_string(z) //bottom
+    };
 
-        for (int i = 0; i < 6; ++i)
-            cube->renderFace[i] = cubeList.find(checkSurroundings[i]) == cubeList.end();
-
-    }
+    for (int i = 0; i < 6; ++i)
+        cube->renderFace[i] = cubeList.find(checkSurroundings[i]) == cubeList.end();
 }
 
 Renderer::Renderer(const std::unordered_map<std::string, Cube *> &cubeList) : cubeList(cubeList) {}
@@ -161,9 +159,9 @@ void Renderer::reloadIBO(unsigned int IBOid, std::vector<glm::vec4> *e) {
 }
 
 void Renderer::deleteFace(glm::vec3 pos, int side) {
-    std::vector<glm::vec4> * sideBuffer = &faceOffsets[side];
+    std::vector<glm::vec4> *sideBuffer = &faceOffsets[side];
     for (int i = 0; i < sideBuffer->size(); i++) {
-        glm::vec4 vec =  faceOffsets[side][i];
+        glm::vec4 vec = faceOffsets[side][i];
         if (pos == glm::vec3(vec.x, vec.y, vec.z)) {
             sideBuffer->erase(sideBuffer->begin() + i);
             reloadIBO(facesIBOs[side], sideBuffer);
@@ -173,16 +171,36 @@ void Renderer::deleteFace(glm::vec3 pos, int side) {
 }
 
 void Renderer::createFace(int x, int y, int z, int side) {
-    Cube *face = cubeList[std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z)];
-    face->renderFace[side] = true;
-    std::vector<glm::vec4> * off = &faceOffsets[side];
-    off->push_back(glm::vec4(x, y, z, face->getTextureArrayIndexs()[side]));
+    Cube *cube = cubeList[std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z)];
+    cube->renderFace[side] = true;
+    std::vector<glm::vec4> *off = &faceOffsets[side];
+    off->push_back(glm::vec4(x, y, z, cube->getTextureArrayIndexs()[side]));
     reloadIBO(facesIBOs[side], off);
 }
 
 
 void Renderer::addCube(Cube *cube) {
-
+    int x = static_cast<int>(cube->cubPos.x), y = static_cast<int>(cube->cubPos.y), z = static_cast<int>(cube->cubPos.z), s = static_cast<int>(
+            2 * CUBE_SIZE);
+    std::string key = std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
+    killUselessNeighbours(cube);
+    cubeList[key] = cube;
+    for (int i = 0; i < 6; ++i) {
+        if (cube->renderFace[i]) {
+            faceOffsets[i].push_back(glm::vec4(x, y, z, cube->getTextureArrayIndexs()[i]));
+            reloadIBO(facesIBOs[i], &faceOffsets[i]);
+        } else {
+            glm::vec3 posAux = cube->cubPos;
+            int i_n = i % 2 == 0 ? i + 1 : i - 1;
+            if (i == 0 || i == 1)
+                posAux.z = i == 0 ? z - s : z + s;
+            if (i == 2 || i == 3)
+                posAux.x = i == 2 ? x + s : x - s;
+            if (i == 4 || i == 5)
+                posAux.y = i == 4 ? y + s : y - s;
+            deleteFace(posAux, i_n);
+        }
+    }
 }
 
 void Renderer::removeCube(Cube *cube) {

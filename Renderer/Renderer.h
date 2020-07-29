@@ -16,7 +16,7 @@ public:
 private:
     std::array<unsigned int, 6> facesVAOs;
 
-    void killUselessNeighbours(std::unordered_map<std::string, Cube *> cubeList);
+    void killUselessNeighbours(Cube * cube);
 
     void createFace(int x, int y ,int z,int side);
 

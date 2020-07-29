@@ -55,7 +55,9 @@ void Control::handleRenderer(Renderer *renderer) {
 
     }
     if (keyboard[SDL_SCANCODE_Q]) {
-
+        std::string key = "0,3,0";
+        if (renderer->cubeList.find(key) == renderer->cubeList.end())
+            renderer->addCube(new Cube(STONE_BLOCK,glm::vec3(0,3,0)));
     }
 }
 
