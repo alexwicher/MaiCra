@@ -8,6 +8,12 @@
 #include "../Camera/Camera.h"
 #include "../Cube/Cube.h"
 
+class RaySelection {
+public:
+    Cube *cubeSelected;
+    int faceSelected;
+};
+
 class Renderer {
 private:
 public:
@@ -16,26 +22,30 @@ public:
 private:
     std::array<unsigned int, 6> facesVAOs;
 
-    void killUselessNeighbours(Cube * cube);
+    void killUselessNeighbours(Cube *cube);
 
-    void createFace(int x, int y ,int z,int side);
+    void createFace(int x, int y, int z, int side);
 
-    void deleteFace(glm::vec3 pos,int side);
+    void deleteFace(int x, int y, int z, int side);
 
     void reloadIBO(unsigned int IBOid, std::vector<glm::vec4> *e);
+    int getFaceFromRetroRay(glm::vec3 retroRay);
 
 public:
     std::array<std::vector<glm::vec4>, 6> faceOffsets;
     std::unordered_map<std::string, Cube *> cubeList;
     std::array<unsigned int, 6> facesIBOs;
 
-    void addCube(Cube *cube);
+    void addCube(RaySelection * raySelection,std::array<char *, 6> cubeType);
 
-    void removeCube(Cube *cube);
+    void removeCube(std::string cubeKey);
 
     void initCubeInstancing(ShaderLoader *shader);
 
     void renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera);
+
+    RaySelection *getCubeFromMouseRay(Camera *camera);
+
 };
 
 

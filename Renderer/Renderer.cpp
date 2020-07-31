@@ -158,11 +158,11 @@ void Renderer::reloadIBO(unsigned int IBOid, std::vector<glm::vec4> *e) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Renderer::deleteFace(glm::vec3 pos, int side) {
+void Renderer::deleteFace(int x, int y, int z, int side) {
     std::vector<glm::vec4> *sideBuffer = &faceOffsets[side];
     for (int i = 0; i < sideBuffer->size(); i++) {
         glm::vec4 vec = faceOffsets[side][i];
-        if (pos == glm::vec3(vec.x, vec.y, vec.z)) {
+        if (glm::vec3(x, y, z) == glm::vec3(vec.x, vec.y, vec.z)) {
             sideBuffer->erase(sideBuffer->begin() + i);
             reloadIBO(facesIBOs[side], sideBuffer);
             break;
@@ -179,37 +179,58 @@ void Renderer::createFace(int x, int y, int z, int side) {
 }
 
 
-void Renderer::addCube(Cube *cube) {
-    int x = static_cast<int>(cube->cubPos.x), y = static_cast<int>(cube->cubPos.y), z = static_cast<int>(cube->cubPos.z), s = static_cast<int>(
-            2 * CUBE_SIZE);
-    std::string key = std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
-    killUselessNeighbours(cube);
-    cubeList[key] = cube;
-    for (int i = 0; i < 6; ++i) {
-        if (cube->renderFace[i]) {
-            faceOffsets[i].push_back(glm::vec4(x, y, z, cube->getTextureArrayIndexs()[i]));
-            reloadIBO(facesIBOs[i], &faceOffsets[i]);
-        } else {
-            glm::vec3 posAux = cube->cubPos;
-            int i_n = i % 2 == 0 ? i + 1 : i - 1;
-            if (i == 0 || i == 1)
-                posAux.z = i == 0 ? z - s : z + s;
-            if (i == 2 || i == 3)
-                posAux.x = i == 2 ? x + s : x - s;
-            if (i == 4 || i == 5)
-                posAux.y = i == 4 ? y + s : y - s;
-            deleteFace(posAux, i_n);
+void Renderer::addCube(RaySelection *raySelection, std::array<char *, 6> cubeType) {
+    int s = (int) (2 * CUBE_SIZE);
+    if (raySelection->cubeSelected) {
+        glm::vec3 newCub = raySelection->cubeSelected->cubPos;
+        int face = raySelection->faceSelected;
+        if (face == 0 || face == 1) {
+            newCub.z += face == 0 ? -s : s;
+        }
+        if (face == 2 || face == 3) {
+            newCub.x += face == 2 ? -s : s;
+        }
+        if (face == 5 || face == 4) {
+            newCub.y += face == 5 ? -s : s;
+        }
+
+        Cube *cube = new Cube(cubeType, newCub);
+        if (cubeList.find(cube->key) != cubeList.end())
+            return;
+        int x = static_cast<int>(cube->cubPos.x), y = static_cast<int>(cube->cubPos.y), z = static_cast<int>(cube->cubPos.z);
+        killUselessNeighbours(cube);
+        cubeList[cube->key] = cube;
+        for (int i = 0; i < 6; ++i) {
+            if (cube->renderFace[i]) {
+                faceOffsets[i].push_back(glm::vec4(x, y, z, cube->getTextureArrayIndexs()[i]));
+                reloadIBO(facesIBOs[i], &faceOffsets[i]);
+            } else {
+                int x_n = x, y_n = y, z_n = z, i_n = i % 2 == 0 ? i + 1 : i - 1;
+                if (i == 0 || i == 1)
+                    z_n = i == 0 ? z - s : z + s;
+                if (i == 2 || i == 3)
+                    x_n = i == 2 ? x + s : x - s;
+                if (i == 4 || i == 5)
+                    y_n = i == 4 ? y + s : y - s;
+                cubeList[std::to_string(x_n) + "," +
+                         std::to_string(y_n) + "," +
+                         std::to_string(z_n)]->renderFace[i_n] = false;
+                deleteFace(x_n, y_n, z_n, i_n);
+            }
         }
     }
 }
 
-void Renderer::removeCube(Cube *cube) {
+void Renderer::removeCube(std::string cubeKey) {
+    if (cubeList.find(cubeKey) == cubeList.end())
+        return;
+    Cube *cube = cubeList[cubeKey];
     int x = static_cast<int>(cube->cubPos.x), y = static_cast<int>(cube->cubPos.y), z = static_cast<int>(cube->cubPos.z), s = static_cast<int>(
             2 * CUBE_SIZE);
     std::string key = std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
     for (int i = 0; i < 6; i++) {
         std::vector<glm::vec4> e = faceOffsets[i];
-        deleteFace(cube->cubPos, i);
+        deleteFace(x, y, z, i);
 
         if (!cube->renderFace[i]) {
             int x_n = x, y_n = y, z_n = z, i_n = i % 2 == 0 ? i + 1 : i - 1;
@@ -222,6 +243,57 @@ void Renderer::removeCube(Cube *cube) {
             createFace(x_n, y_n, z_n, i_n);
         }
 
-        cubeList.erase(key);
+        cubeList.erase(cube->key);
     }
+}
+
+RaySelection *Renderer::getCubeFromMouseRay(Camera *camera) {
+    std::string key;
+    auto *rayResult = new RaySelection();
+    bool cubeFound = false;
+    glm::vec3 partialRay = glm::vec3();
+    for (int i = 1; i <= RAY_LENGH; ++i) {
+        partialRay = camera->pos + (camera->front * ((float) i));
+        int x = (int) (glm::round(partialRay.x)), y = (int) (glm::round(partialRay.y)), z = (int) (glm::round(
+                partialRay.z));
+        std::string aux = std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
+        if (cubeList.find(aux) != cubeList.end()) {
+            key = aux;
+            cubeFound = true;
+            break;
+        }
+    }
+    if (cubeFound) {
+        //TODO: retroRay precition must be improved ...
+        glm::vec3 retroRay = (partialRay + (-camera->front) - cubeList[key]->cubPos);
+        rayResult->cubeSelected = cubeList[key];
+        rayResult->faceSelected = getFaceFromRetroRay(retroRay);
+
+        printf(" pos %f,%f,%f \n", camera->pos.x, camera->pos.y, camera->pos.z);
+        printf(" ray %f,%f,%f \n", retroRay.x, retroRay.y, retroRay.z);
+
+        return rayResult;
+    } else
+        return rayResult;
+}
+
+int Renderer::getFaceFromRetroRay(glm::vec3 retroRay) {
+    int maxIdx = 0;
+    float max = glm::abs(retroRay[0]);
+    for (int i = 0; i < 2; ++i) {
+        float next = glm::abs(retroRay[i + 1]);
+        if (next > max) {
+            max = next;
+            maxIdx = i + 1;
+        }
+    }
+
+    if (maxIdx == 0)
+        return (retroRay[maxIdx] > 0) ? 3 : 2;
+    if (maxIdx == 1)
+        return (retroRay[maxIdx] > 0) ? 4 : 5;
+    if (maxIdx == 2)
+        return (retroRay[maxIdx] > 0) ? 1 : 0;
+
+    return -1;
 }

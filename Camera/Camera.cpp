@@ -9,7 +9,7 @@ glm::mat4 Camera::getView() {
 }
 
 glm::mat4 Camera::getProjection() {
-    return glm::perspective(glm::radians(FOV), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, LINE_OF_SIGHT);
+    return projection;
 }
 
 Camera::Camera(const glm::vec3 &pos) : pos(pos) {
@@ -20,6 +20,7 @@ Camera::Camera(const glm::vec3 &pos) : pos(pos) {
     front = glm::vec3(0, 0, -1);
     worldUp = up;
 
+    projection = glm::perspective(glm::radians(FOV), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, LINE_OF_SIGHT);
 }
 
 void Camera::moveBackward(float deltaTime) {
@@ -60,17 +61,17 @@ void Camera::updateCameraVectors() {
     frontAux.y = glm::sin(glm::radians(pitch));
     frontAux.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
     front = glm::normalize(frontAux);
-    right = glm::normalize(glm::cross(front,
-                                      worldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+    right = glm::normalize(glm::cross(front, worldUp));
     up = glm::normalize(glm::cross(right, front));
+    // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 }
 
-const glm::vec3 &Camera::getPos() const {
-    return pos;
+glm::vec3 Camera::getRayCoords() {
+    return pos + (front * RAY_LENGH);
 }
 
-void Camera::setPos(const glm::vec3 &pos) {
-    Camera::pos = pos;
+void Camera::setProjection(const glm::mat4 &projection) {
+    Camera::projection = projection;
 }
 
 

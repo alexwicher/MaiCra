@@ -25,5 +25,6 @@ add_executable(
         Chunk/Chunk.cpp Chunk/Chunk.h
         Chunk/Mesh/Vertex.cpp Chunk/Mesh/Vertex.h
         Chunk/Mesh/Texture.cpp Chunk/Mesh/Texture.h
-        Chunk/Mesh/Mesh.cpp Chunk/Mesh/Mesh.h)
+        Chunk/Mesh/Mesh.cpp Chunk/Mesh/Mesh.h
+)
 

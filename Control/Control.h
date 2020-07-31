@@ -10,10 +10,7 @@ private:
     bool mouseIn;
 public:
     Control();
-
-public:
-    void handleCamera(Camera * camera,bool * loop, SDL_Window *window, float deltaTime);
-    void handleRenderer(Renderer * renderer);
+    void handleControlsEvenst(Camera *camera,Renderer * renderer,bool * loop, SDL_Window *window, float deltaTime);
 };
 
 

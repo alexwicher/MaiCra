@@ -10,32 +10,37 @@
 
 class Camera {
 private:
-    glm::vec3 pos;
     glm::vec3 right;
     glm::vec3 up;
     glm::vec3 worldUp;
-public:
-    const glm::vec3 &getPos() const;
+    float yaw, pitch;
 
-    void setPos(const glm::vec3 &pos);
-
-private:
-    glm::vec3 front;
-    float yaw,pitch;
+    glm::mat4 projection;
 
     void updateCameraVectors();
 
 public:
+    glm::vec3 front;
+    glm::vec3 pos;
+
     explicit Camera(const glm::vec3 &pos);
 
-    void motion(float x,float y,SDL_Window * window);
+    void motion(float x, float y, SDL_Window *window);
 
     void moveFoward(float deltaTime);
+
     void moveBackward(float deltaTime);
+
     void moveLeft(float deltaTime);
+
     void moveRight(float deltaTime);
 
+    glm::vec3 getRayCoords();
+
+    void setProjection(const glm::mat4 &projection);
+
     glm::mat4 getView();
+
     glm::mat4 getProjection();
 
 

@@ -4,7 +4,7 @@
 
 extern std::unordered_map<std::string,unsigned int> TEXTURE_INDEX_MAP;
 
-extern std::array<const char *,10> CUBES_TEX_LIST;
+extern std::array<const char *,11> CUBES_TEX_LIST;
 extern char *DIRT;
 extern char *GRASS;
 extern char *GRASS_SIDE;
@@ -17,3 +17,5 @@ extern char *FIVE;
 extern char *SIX;
 
 extern char *STONE;
+
+extern char *BRICK_STONE;

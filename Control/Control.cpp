@@ -8,20 +8,23 @@
 #include "../gameSettings.h"
 #include "../Resources/cubes/cubeTypes.h"
 
-void Control::handleCamera(Camera *camera, bool *loop, SDL_Window *window, float deltaTime) {
+Control::Control() {
+    mouseIn = true;
+    SDL_ShowCursor(SDL_DISABLE);
+
+}
+
+void
+Control::handleControlsEvenst(Camera *camera, Renderer *renderer, bool *loop, SDL_Window *window, float deltaTime) {
     const Uint8 *keyboard = SDL_GetKeyboardState(nullptr);
-    if (keyboard[SDL_SCANCODE_W]) {
+    if (keyboard[SDL_SCANCODE_W])
         camera->moveFoward(deltaTime);
-    }
-    if (keyboard[SDL_SCANCODE_S]) {
+    if (keyboard[SDL_SCANCODE_S])
         camera->moveBackward(deltaTime);
-    }
-    if (keyboard[SDL_SCANCODE_A]) {
+    if (keyboard[SDL_SCANCODE_A])
         camera->moveLeft(deltaTime);
-    }
-    if (keyboard[SDL_SCANCODE_D]) {
+    if (keyboard[SDL_SCANCODE_D])
         camera->moveRight(deltaTime);
-    }
     if (keyboard[SDL_SCANCODE_F12]) {
         *loop = false;
         SDL_Quit();
@@ -35,34 +38,31 @@ void Control::handleCamera(Camera *camera, bool *loop, SDL_Window *window, float
     while (SDL_PollEvent(&event)) {
         int x, y;
         Uint32 mouse = SDL_GetMouseState(&x, &y);
-        if (mouse == 1) {
-            mouseIn = true;
-            SDL_ShowCursor(SDL_DISABLE);
-        }
+        mouseIn = true;
         if (mouseIn) {
             camera->motion((float) x, (float) y, window);
         }
+        switch(event.type){
+            case SDL_MOUSEBUTTONDOWN:
+                SDL_ShowCursor(SDL_DISABLE);
+
+                if ((SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT))) {
+                    renderer->addCube(renderer->getCubeFromMouseRay(camera),STONE_BRICK_BLOCK);
+                }
+                if ((SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_RIGHT))) {
+                    Cube *cub = renderer->getCubeFromMouseRay(camera)->cubeSelected;
+                    if (cub) {
+                        renderer->removeCube(cub->key);
+                    }
+                }
+                break;
+
+            default:break;
+        }
+
+
+
     }
 
-}
-
-void Control::handleRenderer(Renderer *renderer) {
-    const Uint8 *keyboard = SDL_GetKeyboardState(nullptr);
-    if (keyboard[SDL_SCANCODE_E]) {
-        std::string key = "0,3,0";
-        if (renderer->cubeList.find(key) != renderer->cubeList.end())
-            renderer->removeCube(renderer->cubeList[key]);
-
-    }
-    if (keyboard[SDL_SCANCODE_Q]) {
-        std::string key = "0,3,0";
-        if (renderer->cubeList.find(key) == renderer->cubeList.end())
-            renderer->addCube(new Cube(STONE_BLOCK,glm::vec3(0,3,0)));
-    }
-}
-
-Control::Control() {
-    mouseIn = true;
-    SDL_ShowCursor(SDL_DISABLE);
 
 }

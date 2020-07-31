@@ -23,7 +23,7 @@ int Game::startGame() {
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::unordered_map<std::string, Cube *> dumbMap;
-    int x = 2, y = 5, z = 2;
+    int x = 44, y = 2, z = 44;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             for (int k = 0; k < z; ++k) {
@@ -37,16 +37,14 @@ int Game::startGame() {
 
     Control control = Control();
     Camera camera = Camera(glm::vec3(0, y+1.5, 0));
-    Renderer cubes = Renderer(dumbMap);
-    cubes.initCubeInstancing(&shader);
+    Renderer renderer = Renderer(dumbMap);
+    renderer.initCubeInstancing(&shader);
     bool loop = true;
     unsigned int lastFrame = 0, deltaTime = 0;    // time between current frame and last frame
     while (loop) {
-        control.handleCamera(&camera, &loop, window, deltaTime);
+        control.handleControlsEvenst(&camera,&renderer,&loop,window,deltaTime);
 
-        cubes.renderCubes(textureArray, &shader,&camera);
-
-        control.handleRenderer(&cubes);
+        renderer.renderCubes(textureArray, &shader,&camera);
 
         unsigned int currentFrame = SDL_GetTicks();
         deltaTime = currentFrame - lastFrame;

@@ -24,6 +24,14 @@ std::array<char *, 6> STONE_BLOCK = {
         STONE,
         STONE
 };
+std::array<char *, 6> STONE_BRICK_BLOCK= {
+        BRICK_STONE,
+        BRICK_STONE,
+        BRICK_STONE,
+        BRICK_STONE,
+        BRICK_STONE,
+        BRICK_STONE
+};
 std::array<char *, 6> DEV_BLOCK = {
         ONE,
         TWO,

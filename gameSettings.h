@@ -12,4 +12,6 @@ extern float LINE_OF_SIGHT;
 
 extern float CUBE_SIZE;
 
+extern float RAY_LENGH;
+
 #endif //MAICRA_GAMESETTINGS_H
