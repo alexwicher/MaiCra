@@ -49,7 +49,7 @@ bool loadGlad() {
     printf("Vendor:   %s\n", glGetString(GL_VENDOR));
     printf("Renderer: %s\n", glGetString(GL_RENDERER));
     printf("Version:  %s\n", glGetString(GL_VERSION));
-    printf("GL_MAX_ARRAY_TEXTURE_LAYERS --> %i",a);
+    printf("GL_MAX_ARRAY_TEXTURE_LAYERS --> %i \n",a);
     return true;
 
 }

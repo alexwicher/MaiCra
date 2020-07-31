@@ -1,5 +1,6 @@
 #include "TextureLoader.h"
 #include "../Resources/textures/textureTypes.h"
+#include "../Resources/cubes/cubeTypes.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -55,6 +56,16 @@ unsigned int TextureLoader::loadCubeTextures() {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+    fillBlockArray();
+    for (int j = 0; j < BLOCKS_ARRAYS.size() ; ++j) {
+        std::array<unsigned int,6> textureIndexs;
+        for (int i = 0; i < BLOCKS_ARRAYS[j].size() ; ++i) {
+            textureIndexs[i] = TEXTURE_INDEX_MAP[BLOCKS_ARRAYS[j][i]];
+        }
+        BLOCK_TEXTURES_IDXS[j] = textureIndexs;
+    }
+
     return texture;
 
 }

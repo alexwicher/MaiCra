@@ -1,42 +1,23 @@
 #include "cubeTypes.h"
 
-std::array<char *, 6> GRASS_BLOCK = {
-        GRASS_SIDE,
-        GRASS_SIDE,
-        GRASS_SIDE,
-        GRASS_SIDE,
-        GRASS,
-        DIRT
-};
-std::array<char *, 6> DIRT_BLOCK = {
-        DIRT,
-        DIRT,
-        DIRT,
-        DIRT,
-        DIRT,
-        DIRT
-};
-std::array<char *, 6> STONE_BLOCK = {
-        STONE,
-        STONE,
-        STONE,
-        STONE,
-        STONE,
-        STONE
-};
-std::array<char *, 6> STONE_BRICK_BLOCK= {
-        BRICK_STONE,
-        BRICK_STONE,
-        BRICK_STONE,
-        BRICK_STONE,
-        BRICK_STONE,
-        BRICK_STONE
-};
-std::array<char *, 6> DEV_BLOCK = {
-        ONE,
-        TWO,
-        THREE,
-        FOUR,
-        FIVE,
-        SIX
-};
+
+std::array<std::array<unsigned int, 6>, size> BLOCK_TEXTURES_IDXS;
+std::array<std::array<char *, 6>, size> BLOCKS_ARRAYS;
+
+unsigned short GRASS_BLOCK = 0;
+unsigned short STONE_BRICK_BLOCK = 1;
+
+void fillBlockArray() {
+    BLOCKS_ARRAYS[GRASS_BLOCK] = {GRASS_SIDE,
+                                  GRASS_SIDE,
+                                  GRASS_SIDE,
+                                  GRASS_SIDE,
+                                  GRASS,
+                                  DIRT};
+    BLOCKS_ARRAYS[STONE_BRICK_BLOCK] = {STONE_BRICK,
+                                        STONE_BRICK,
+                                        STONE_BRICK,
+                                        STONE_BRICK,
+                                        STONE_BRICK,
+                                        STONE_BRICK};
+}

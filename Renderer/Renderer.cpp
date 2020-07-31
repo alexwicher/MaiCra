@@ -82,8 +82,8 @@ void Renderer::initCubeInstancing(ShaderLoader *shader) {
     for (auto &i : cubeList) {
         Cube cube = *i.second;
         float offx = cube.cubPos.x, offy = cube.cubPos.y, offz = cube.cubPos.z;
-        for (int j = 0; j < cube.renderFace.size(); ++j)
-            if (cube.renderFace[j])
+        for (int j = 0; j < 6; ++j)
+            if (cube.shouldRenderFace(j))
                 faceOffsets[j].emplace_back(glm::vec4(offx, offy, offz, cube.getTextureArrayIndexs()[j]));
 
     }
@@ -146,7 +146,7 @@ void Renderer::killUselessNeighbours(Cube *cube) {
     };
 
     for (int i = 0; i < 6; ++i)
-        cube->renderFace[i] = cubeList.find(checkSurroundings[i]) == cubeList.end();
+        cube->setRenderFace(i,cubeList.find(checkSurroundings[i]) == cubeList.end());
 }
 
 Renderer::Renderer(const std::unordered_map<std::string, Cube *> &cubeList) : cubeList(cubeList) {}
@@ -172,14 +172,14 @@ void Renderer::deleteFace(int x, int y, int z, int side) {
 
 void Renderer::createFace(int x, int y, int z, int side) {
     Cube *cube = cubeList[std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z)];
-    cube->renderFace[side] = true;
+    cube->setRenderFace(side,true);
     std::vector<glm::vec4> *off = &faceOffsets[side];
     off->push_back(glm::vec4(x, y, z, cube->getTextureArrayIndexs()[side]));
     reloadIBO(facesIBOs[side], off);
 }
 
 
-void Renderer::addCube(RaySelection *raySelection, std::array<char *, 6> cubeType) {
+void Renderer::addCube(RaySelection *raySelection, unsigned short cubeType) {
     int s = (int) (2 * CUBE_SIZE);
     if (raySelection->cubeSelected) {
         glm::vec3 newCub = raySelection->cubeSelected->cubPos;
@@ -195,13 +195,13 @@ void Renderer::addCube(RaySelection *raySelection, std::array<char *, 6> cubeTyp
         }
 
         Cube *cube = new Cube(cubeType, newCub);
-        if (cubeList.find(cube->key) != cubeList.end())
+        if (cubeList.find(cube->getKey()) != cubeList.end())
             return;
         int x = static_cast<int>(cube->cubPos.x), y = static_cast<int>(cube->cubPos.y), z = static_cast<int>(cube->cubPos.z);
         killUselessNeighbours(cube);
-        cubeList[cube->key] = cube;
+        cubeList[cube->getKey()] = cube;
         for (int i = 0; i < 6; ++i) {
-            if (cube->renderFace[i]) {
+            if (cube->shouldRenderFace(i)) {
                 faceOffsets[i].push_back(glm::vec4(x, y, z, cube->getTextureArrayIndexs()[i]));
                 reloadIBO(facesIBOs[i], &faceOffsets[i]);
             } else {
@@ -214,7 +214,7 @@ void Renderer::addCube(RaySelection *raySelection, std::array<char *, 6> cubeTyp
                     y_n = i == 4 ? y + s : y - s;
                 cubeList[std::to_string(x_n) + "," +
                          std::to_string(y_n) + "," +
-                         std::to_string(z_n)]->renderFace[i_n] = false;
+                         std::to_string(z_n)]->setRenderFace(i_n,false);
                 deleteFace(x_n, y_n, z_n, i_n);
             }
         }
@@ -232,7 +232,7 @@ void Renderer::removeCube(std::string cubeKey) {
         std::vector<glm::vec4> e = faceOffsets[i];
         deleteFace(x, y, z, i);
 
-        if (!cube->renderFace[i]) {
+        if (!cube->shouldRenderFace(i)) {
             int x_n = x, y_n = y, z_n = z, i_n = i % 2 == 0 ? i + 1 : i - 1;
             if (i == 0 || i == 1)
                 z_n = i == 0 ? z - s : z + s;
@@ -243,7 +243,7 @@ void Renderer::removeCube(std::string cubeKey) {
             createFace(x_n, y_n, z_n, i_n);
         }
 
-        cubeList.erase(cube->key);
+        cubeList.erase(cube->getKey());
     }
 }
 
@@ -268,10 +268,6 @@ RaySelection *Renderer::getCubeFromMouseRay(Camera *camera) {
         glm::vec3 retroRay = (partialRay + (-camera->front) - cubeList[key]->cubPos);
         rayResult->cubeSelected = cubeList[key];
         rayResult->faceSelected = getFaceFromRetroRay(retroRay);
-
-        printf(" pos %f,%f,%f \n", camera->pos.x, camera->pos.y, camera->pos.z);
-        printf(" ray %f,%f,%f \n", retroRay.x, retroRay.y, retroRay.z);
-
         return rayResult;
     } else
         return rayResult;

@@ -36,7 +36,7 @@ public:
     std::unordered_map<std::string, Cube *> cubeList;
     std::array<unsigned int, 6> facesIBOs;
 
-    void addCube(RaySelection * raySelection,std::array<char *, 6> cubeType);
+    void addCube(RaySelection * raySelection,unsigned short cubeType);
 
     void removeCube(std::string cubeKey);
 

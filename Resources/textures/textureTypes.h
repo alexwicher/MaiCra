@@ -18,4 +18,4 @@ extern char *SIX;
 
 extern char *STONE;
 
-extern char *BRICK_STONE;
+extern char *STONE_BRICK;

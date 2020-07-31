@@ -6,21 +6,17 @@
 #include <glm/vec3.hpp>
 
 class Cube {
-private:
-    std::array<unsigned int, 6> textureArrayIndexs;
-
-
 public:
-    std::array<char *, 6> cubeType;
-    std::array<bool, 6> renderFace;
-    std::string key;
-
-    Cube(const std::array<char *, 6> &cubeType, const glm::vec3 &cubPos);
+    unsigned char renderFace;
+    unsigned short cubeType;
+    Cube(unsigned short cubeType, const glm::vec3 &cubPos);
 
     const std::array<unsigned int, 6> &getTextureArrayIndexs() const;
 
     glm::vec3 cubPos;
-
+    std::string getKey();
+    bool shouldRenderFace(int face);
+    void setRenderFace(int face,bool set);
 };
 
 

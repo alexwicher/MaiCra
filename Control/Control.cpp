@@ -52,7 +52,7 @@ Control::handleControlsEvenst(Camera *camera, Renderer *renderer, bool *loop, SD
                 if ((SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_RIGHT))) {
                     Cube *cub = renderer->getCubeFromMouseRay(camera)->cubeSelected;
                     if (cub) {
-                        renderer->removeCube(cub->key);
+                        renderer->removeCube(cub->getKey());
                     }
                 }
                 break;

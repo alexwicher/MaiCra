@@ -23,28 +23,28 @@ int Game::startGame() {
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::unordered_map<std::string, Cube *> dumbMap;
-    int x = 44, y = 2, z = 44;
+    Cube pee = Cube(GRASS_BLOCK,glm::vec3(55,5,5));
+    int x = 128, y = 128, z = 128;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             for (int k = 0; k < z; ++k) {
-                dumbMap[getKey(i,j,k)] = (new Cube(GRASS_BLOCK, glm::vec3(i, j, k)));
+                dumbMap[getKey(i, j, k)] = (new Cube(GRASS_BLOCK, glm::vec3(i, j, k)));
             }
         }
     }
     ShaderLoader shader = ShaderLoader(const_cast<char *>("../Shader/rtsShader.vert"),
                                        const_cast<char *>("../Shader/rtsShader.frag"));
 
-
     Control control = Control();
-    Camera camera = Camera(glm::vec3(0, y+1.5, 0));
+    Camera camera = Camera(glm::vec3(0, y + 1.5, 0));
     Renderer renderer = Renderer(dumbMap);
     renderer.initCubeInstancing(&shader);
     bool loop = true;
     unsigned int lastFrame = 0, deltaTime = 0;    // time between current frame and last frame
     while (loop) {
-        control.handleControlsEvenst(&camera,&renderer,&loop,window,deltaTime);
+        control.handleControlsEvenst(&camera, &renderer, &loop, window, deltaTime);
 
-        renderer.renderCubes(textureArray, &shader,&camera);
+        renderer.renderCubes(textureArray, &shader, &camera);
 
         unsigned int currentFrame = SDL_GetTicks();
         deltaTime = currentFrame - lastFrame;
