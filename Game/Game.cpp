@@ -36,7 +36,8 @@ int Game::startGame() {
                                        const_cast<char *>("../Shader/rtsShader.frag"));
 
     Control control = Control();
-    Camera camera = Camera(glm::vec3(0, y + 1.5, 0));
+    glm::vec3 lightPosition = glm::vec3(x/2,y+1000,z/2);
+    Camera camera = Camera(glm::vec3(x/2, y + 1.5, z/2));
     Renderer renderer = Renderer(dumbMap);
     renderer.initCubeInstancing(&shader);
     bool loop = true;
@@ -44,9 +45,15 @@ int Game::startGame() {
     while (loop) {
         control.handleControlsEvenst(&camera, &renderer, &loop, window, deltaTime);
 
-        renderer.renderCubes(textureArray, &shader, &camera);
+        renderer.renderCubes(textureArray, &shader, &camera,lightPosition);
+
+
 
         unsigned int currentFrame = SDL_GetTicks();
+
+//        lightPosition.y = glm::sin(currentFrame / 4000.0f) * (y+1000);
+//        lightPosition.x = glm::sin(currentFrame / 4000.0f) * (x/2);
+
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         SDL_GL_SwapWindow(window);

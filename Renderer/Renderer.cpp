@@ -9,16 +9,22 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera) {
+void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera,glm::vec3 lightPosition) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shader->use();
+    glm::vec3 lightPos(8, 128, 8);
+    shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    shader->setVec3("lightPos", lightPosition);
+    shader->setVec3("viewPos", camera->pos);
+
+
     glm::mat4 projection = camera->getProjection();
     shader->setMat4("projection", projection);
-
-    // modelView transformation
     glm::mat4 view = camera->getView();
-    shader->setMat4("modelView", view);
+    shader->setMat4("view", view);
+    glm::mat4 model = glm::mat4(1.0f);
+    shader->setMat4("model", model);
 
     for (int i = 0; i < facesVAOs.size(); ++i) {
         unsigned int VAO = facesVAOs[i];
@@ -33,48 +39,49 @@ void Renderer::initCubeInstancing(ShaderLoader *shader) {
     shader->use();
     shader->setInt("texture1", 0);
     float s = CUBE_SIZE;
-    std::array<float, 20> front = {
-            -s, s, -s, 0.0f, 1.0f,  //F-A -s s 0
-            s, s, -s, 1.0f, 1.0f,  //F-B s s 1
-            s, -s, -s, 1.0f, 0.0f,  //F-C s -s 2
-            -s, -s, -s, 0.0f, 0.0f  //F-D -s -s 3
+    const int size = 32;
+    std::array<float, size> front = {
+            -s, s, -s, 0.0f, 1.0f,0.0f,  0.0f, -1.0f,  //F-A -s s 0
+            s, s, -s, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f, //F-B s s 1
+            s, -s, -s, 1.0f, 0.0f,0.0f,  0.0f, -1.0f,  //F-C s -s 2
+            -s, -s, -s, 0.0f, 0.0f,0.0f,  0.0f, -1.0f  //F-D -s -s 3
     };
-    std::array<float, 20> back = {
-            -s, s, s, 0.0f, 1.0f, //B-A -s s 4
-            s, s, s, 1.0f, 1.0f,  //B-B s s 5
-            s, -s, s, 1.0f, 0.0f, //B-C s- s 6
-            -s, -s, s, 0.0f, 0.0f  //B-D -s -s 7
+    std::array<float, size> back = {
+            -s, s, s, 0.0f, 1.0f,0.0f,  0.0f, 1.0f, //B-A -s s 4
+            s, s, s, 1.0f, 1.0f,0.0f,  0.0f, 1.0f,  //B-B s s 5
+            s, -s, s, 1.0f, 0.0f,0.0f,  0.0f, 1.0f, //B-C s- s 6
+            -s, -s, s, 0.0f, 0.0f,0.0f,  0.0f, 1.0f  //B-D -s -s 7
     };
-    std::array<float, 20> right = {
-            s, s, -s, 0.0f, 1.0f, //F-B
-            s, s, s, 1.0f, 1.0f, //B-B
-            s, -s, s, 1.0f, 0.0f, //B-C
-            s, -s, -s, 0.0f, 0.0f  //F-C
+    std::array<float, size> right = {
+            s, s, -s, 0.0f, 1.0f,-1.0f,  0.0f,  0.0f, //F-B
+            s, s, s, 1.0f, 1.0f,-1.0f,  0.0f,  0.0f, //B-B
+            s, -s, s, 1.0f, 0.0f,-1.0f,  0.0f,  0.0f, //B-C
+            s, -s, -s, 0.0f, 0.0f,-1.0f,  0.0f,  0.0f  //F-C
     };
-    std::array<float, 20> left = {
-            -s, s, s, 0.0f, 1.0f, //B-A
-            -s, s, -s, 1.0f, 1.0f, //F-A
-            -s, -s, -s, 1.0f, 0.0f, //F-D
-            -s, -s, s, 0.0f, 0.0f  //B-D
+    std::array<float, size> left = {
+            -s, s, s, 0.0f, 1.0f,1.0f,  0.0f,  0.0f, //B-A
+            -s, s, -s, 1.0f, 1.0f,1.0f,  0.0f,  0.0f, //F-A
+            -s, -s, -s, 1.0f, 0.0f,1.0f,  0.0f,  0.0f, //F-D
+            -s, -s, s, 0.0f, 0.0f,1.0f,  0.0f,  0.0f //B-D
     };
-    std::array<float, 20> top = {
-            -s, s, s, 0.0f, 1.0f, //B-A
-            s, s, s, 1.0f, 1.0f, //B-B
-            s, s, -s, 1.0f, 0.0f, //F-B
-            -s, s, -s, 0.0f, 0.0f  //F-A
+    std::array<float, size> top = {
+            -s, s, s, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f, //B-A
+            s, s, s, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f, //B-B
+            s, s, -s, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f, //F-B
+            -s, s, -s, 0.0f, 0.0f, 0.0f,  1.0f,  0.0f,  //F-A
     };
-    std::array<float, 20> bottom = {
-            -s, -s, -s, 0.0f, 1.0f,//F-D
-            s, -s, -s, 1.0f, 1.0f,//F-C
-            s, -s, s, 1.0f, 0.0f,//B-C
-            -s, -s, s, 0.0f, 0.0f //B-D
+    std::array<float, size> bottom = {
+            -s, -s, -s, 0.0f, 1.0f,0.0f, -1.0f,  0.0f,//F-D
+            s, -s, -s, 1.0f, 1.0f,0.0f, -1.0f,  0.0f,//F-C
+            s, -s, s, 1.0f, 0.0f,0.0f, -1.0f,  0.0f,//B-C
+            -s, -s, s, 0.0f, 0.0f,0.0f, -1.0f,  0.0f,//B-D
     };
     unsigned short indices[] = {
             0, 1, 3,
             1, 2, 3
     };
     std::array<std::vector<glm::vec4>, 6> offsets;
-    std::array<std::array<float, 20>, 6> cubeMap = {front, back, right, left, top, bottom};
+    std::array<std::array<float, size>, 6> cubeMap = {front, back, right, left, top, bottom};
     for (std::pair<std::string, Cube *> hash : cubeList) {
         killUselessNeighbours(hash.second);
     }
@@ -90,7 +97,7 @@ void Renderer::initCubeInstancing(ShaderLoader *shader) {
 
     for (int k = 0; k < cubeMap.size(); ++k) {
         unsigned int VBO, VAO, EBO, IBO;
-        std::array<float, 20> face = cubeMap[k];
+        std::array<float, size> face = cubeMap[k];
         // store instance data in an array buffer
         // --------------------------------------
         glGenBuffers(1, &IBO);
@@ -112,18 +119,21 @@ void Renderer::initCubeInstancing(ShaderLoader *shader) {
 
         // position attribute
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
 
         //texture coord attribute
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
 
-        // also set instance data
+        //normal coord attibute
         glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
+        // also set instance data
+        glEnableVertexAttribArray(3);
         glBindBuffer(GL_ARRAY_BUFFER, IBO); // this attribute comes from a different vertex buffer
-        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) 0);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *) 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glVertexAttribDivisor(2, 1); // tell OpenGL this is an instanced vertex attribute.
+        glVertexAttribDivisor(3, 1); // tell OpenGL this is an instanced vertex attribute.
         facesVAOs[k] = VAO;
         facesIBOs[k] = IBO;
     }
