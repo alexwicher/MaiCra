@@ -15,8 +15,8 @@ uniform mat4 model;
 
 void main()
 {
-	FragPos = vec3(model * vec4(position + aOffset.xyz, 1.0));
-	Normal = mat3(transpose(inverse(model))) * (aNormal+ aOffset.xyz);
+	FragPos = vec3(vec4(position + aOffset.xyz, 1.0));
+	Normal = (aNormal);
 
 	gl_Position = projection * view * vec4(position + aOffset.xyz, 1.0f);
 	coords = vec3(textCoords,aOffset.w);

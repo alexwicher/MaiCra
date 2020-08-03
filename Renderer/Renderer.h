@@ -42,7 +42,7 @@ public:
 
     void initCubeInstancing(ShaderLoader *shader);
 
-    void renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera,glm::vec3 lightPosition);
+    void renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera,glm::vec3 lightDirection);
 
     RaySelection *getCubeFromMouseRay(Camera *camera);
 

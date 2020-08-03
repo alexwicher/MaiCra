@@ -9,14 +9,20 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera,glm::vec3 lightPosition) {
+void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera,glm::vec3 lightDirection) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shader->use();
-    glm::vec3 lightPos(8, 128, 8);
-    shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    shader->setVec3("lightPos", lightPosition);
+    shader->setVec3("light.direction", lightDirection);
     shader->setVec3("viewPos", camera->pos);
+
+    // light properties
+    shader->setVec3("light.ambient", glm::vec3(0.1,0.1,0.1));
+    shader->setVec3("light.diffuse", glm::vec3(0.5,0.5,0.5));
+    shader->setVec3("light.specular", glm::vec3(0.2,0.2,0.2));
+    shader->setFloat("light.constant", 1.0f);
+    shader->setFloat("light.linear", 0.014f);
+    shader->setFloat("light.quadratic", 0.000007f);
 
 
     glm::mat4 projection = camera->getProjection();

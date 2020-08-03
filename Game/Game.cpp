@@ -24,7 +24,7 @@ int Game::startGame() {
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::unordered_map<std::string, Cube *> dumbMap;
     Cube pee = Cube(GRASS_BLOCK,glm::vec3(55,5,5));
-    int x = 128, y = 128, z = 128;
+    int x = 128, y = 8, z = 128;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             for (int k = 0; k < z; ++k) {
@@ -36,16 +36,17 @@ int Game::startGame() {
                                        const_cast<char *>("../Shader/rtsShader.frag"));
 
     Control control = Control();
-    glm::vec3 lightPosition = glm::vec3(x/2,y+1000,z/2);
     Camera camera = Camera(glm::vec3(x/2, y + 1.5, z/2));
+
     Renderer renderer = Renderer(dumbMap);
     renderer.initCubeInstancing(&shader);
     bool loop = true;
     unsigned int lastFrame = 0, deltaTime = 0;    // time between current frame and last frame
     while (loop) {
         control.handleControlsEvenst(&camera, &renderer, &loop, window, deltaTime);
+        glm::vec3 lightDirection = glm::vec3( -0.2f, -1.0f, -0.3f);
 
-        renderer.renderCubes(textureArray, &shader, &camera,lightPosition);
+        renderer.renderCubes(textureArray, &shader, &camera,lightDirection);
 
 
 
