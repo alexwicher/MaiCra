@@ -8,79 +8,316 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
-void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera,glm::vec3 lightDirection) {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    shader->use();
-    shader->setVec3("light.direction", lightDirection);
-    shader->setVec3("viewPos", camera->pos);
-
-    // light properties
-    shader->setVec3("light.ambient", glm::vec3(0.1,0.1,0.1));
-    shader->setVec3("light.diffuse", glm::vec3(0.5,0.5,0.5));
-    shader->setVec3("light.specular", glm::vec3(0.2,0.2,0.2));
-    shader->setFloat("light.constant", 1.0f);
-    shader->setFloat("light.linear", 0.014f);
-    shader->setFloat("light.quadratic", 0.000007f);
-
-
-    glm::mat4 projection = camera->getProjection();
-    shader->setMat4("projection", projection);
-    glm::mat4 view = camera->getView();
-    shader->setMat4("view", view);
-    glm::mat4 model = glm::mat4(1.0f);
-    shader->setMat4("model", model);
-
-    for (int i = 0; i < facesVAOs.size(); ++i) {
-        unsigned int VAO = facesVAOs[i];
-        glBindVertexArray(VAO);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
-    }
+// renderCube() renders a 1x1 3D cube in NDC.
+// -------------------------------------------------
+unsigned int cubeVAO = 0;
+unsigned int cubeVBO = 0;
+void renderCube()
+{
+    // initialize (if necessary)
+        float vertices[] = {
+                // back face
+                -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+                // front face
+                -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+                1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+                -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+                -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+                // left face
+                -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+                -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+                -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+                // right face
+                1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left
+                // bottom face
+                -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+                1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+                1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+                -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+                // top face
+                -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+                1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+                1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right
+                1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+                -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+                -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
+        };
+        glGenVertexArrays(1, &cubeVAO);
+        glGenBuffers(1, &cubeVBO);
+        // fill buffer
+        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        // link vertex attributes
+        glBindVertexArray(cubeVAO);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    // render Cube
+    glBindVertexArray(cubeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
 }
 
-void Renderer::initCubeInstancing(ShaderLoader *shader) {
+void renderScene(ShaderLoader &shader)
+{
+    // ------------------------------------------------------------------
+    float planeVertices[] = {
+            // positions            // normals         // texcoords
+            25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+            -25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+            -25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+
+            25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+            -25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+            25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  25.0f, 10.0f
+    };
+    // plane VAO
+    unsigned int planeVBO;unsigned int planeVAO;
+    glGenVertexArrays(1, &planeVAO);
+    glGenBuffers(1, &planeVBO);
+    glBindVertexArray(planeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glBindVertexArray(0);
+    // floor
+    glm::mat4 model = glm::mat4(1.0f);
+    shader.setMat4("model", model);
+    glBindVertexArray(planeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    // cubes
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
+    model = glm::scale(model, glm::vec3(0.5f));
+    shader.setMat4("model", model);
+    renderCube();
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
+    model = glm::scale(model, glm::vec3(0.5f));
+    shader.setMat4("model", model);
+    renderCube();
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
+    model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+    model = glm::scale(model, glm::vec3(0.25));
+    shader.setMat4("model", model);
+    renderCube();
+}
+
+
+
+
+// renderQuad() renders a 1x1 XY quad in NDC
+// -----------------------------------------
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
+void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera, glm::vec3 lightDirection,
+                           ShaderLoader *depthShader, ShaderLoader *debugDepthQuad) {
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+//
+//
+//    // 1. render depth of scene to texture (from light's perspective)
+//    // ---------------------------------------------------------
+//    glm::mat4 lightProjection, lightView;
+//    glm::mat4 lightSpaceMatrix;
+//    float near_plane = 1.0f, far_plane = 7.5f;
+//    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+//    lightView = glm::lookAt(lightDirection, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+//    lightSpaceMatrix = lightProjection * lightView;
+//
+//    depthShader->use();
+//    depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+//    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+//    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+//    glClear(GL_DEPTH_BUFFER_BIT);
+//    glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+//    for (int i = 0; i < facesVAOs.size(); ++i) {
+//        unsigned int VAO = facesVAOs[i];
+//        glBindVertexArray(VAO);
+//        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
+//    }
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//    // reset viewport
+//    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//
+//    // 2. render scene as normal using the generated depth/shadow map
+//    // --------------------------------------------------------------
+//    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//    shader->use();
+//    shader->setVec3("light.direction", lightDirection);
+//    shader->setVec3("viewPos", camera->pos);
+//
+//    // light properties
+//    shader->setVec3("light.ambient", glm::vec3(0.1, 0.1, 0.1));
+//    shader->setVec3("light.diffuse", glm::vec3(0.5, 0.5, 0.5));
+//    shader->setVec3("light.specular", glm::vec3(0, 0, 0));
+//
+//
+//    glm::mat4 projection = camera->getProjection();
+//    shader->setMat4("projection", projection);
+//    glm::mat4 view = camera->getView();
+//    shader->setMat4("view", view);
+//    glm::mat4 model = glm::mat4(1.0f);
+//    shader->setMat4("model", model);
+//
+//    glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+//    for (int i = 0; i < facesVAOs.size(); ++i) {
+//        unsigned int VAO = facesVAOs[i];
+//        glBindVertexArray(VAO);
+//        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
+//    }
+//
+//    // render Depth map to quad for visual debugging
+//    // ---------------------------------------------
+//    debugDepthQuad->use();
+//    debugDepthQuad->setFloat("near_plane", near_plane);
+//    debugDepthQuad->setFloat("far_plane", far_plane);
+//    glBindTexture(GL_TEXTURE_2D, depthMap);
+////    for (int i = 0; i < facesVAOs.size(); ++i) {
+////        unsigned int VAO = facesVAOs[i];
+////        glBindVertexArray(VAO);
+////        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
+////    }
+    // 1. render depth of scene to texture (from light's perspective)
+    // --------------------------------------------------------------
+    glm::mat4 lightProjection, lightView;
+    glm::mat4 lightSpaceMatrix;
+    float near_plane = 1.0f, far_plane = 7.5f;
+    lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    lightView = glm::lookAt(lightDirection, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+    lightSpaceMatrix = lightProjection * lightView;
+    // render scene from light's point of view
+    depthShader->use();
+    depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 1);
+    renderScene(*depthShader);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // reset viewport
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // render Depth map to quad for visual debugging
+    // ---------------------------------------------
+    debugDepthQuad->use();
+    debugDepthQuad->setFloat("near_plane", near_plane);
+    debugDepthQuad->setFloat("far_plane", far_plane);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    renderQuad();
+
+}
+
+void Renderer::initCubeInstancing(ShaderLoader *shader, ShaderLoader *debugDepthQuad) {
 
     shader->use();
     shader->setInt("texture1", 0);
+    shader->setInt("shadowMap", 1);
+    debugDepthQuad->use();
+    debugDepthQuad->setInt("depthMap", 0);
     float s = CUBE_SIZE;
     const int size = 32;
     std::array<float, size> front = {
-            -s, s, -s, 0.0f, 1.0f,0.0f,  0.0f, -1.0f,  //F-A -s s 0
-            s, s, -s, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f, //F-B s s 1
-            s, -s, -s, 1.0f, 0.0f,0.0f,  0.0f, -1.0f,  //F-C s -s 2
-            -s, -s, -s, 0.0f, 0.0f,0.0f,  0.0f, -1.0f  //F-D -s -s 3
+            -s, s, -s, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,  //F-A -s s 0
+            s, s, -s, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, //F-B s s 1
+            s, -s, -s, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,  //F-C s -s 2
+            -s, -s, -s, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f  //F-D -s -s 3
     };
     std::array<float, size> back = {
-            -s, s, s, 0.0f, 1.0f,0.0f,  0.0f, 1.0f, //B-A -s s 4
-            s, s, s, 1.0f, 1.0f,0.0f,  0.0f, 1.0f,  //B-B s s 5
-            s, -s, s, 1.0f, 0.0f,0.0f,  0.0f, 1.0f, //B-C s- s 6
-            -s, -s, s, 0.0f, 0.0f,0.0f,  0.0f, 1.0f  //B-D -s -s 7
+            -s, s, s, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //B-A -s s 4
+            s, s, s, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,  //B-B s s 5
+            s, -s, s, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, //B-C s- s 6
+            -s, -s, s, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f  //B-D -s -s 7
     };
     std::array<float, size> right = {
-            s, s, -s, 0.0f, 1.0f,-1.0f,  0.0f,  0.0f, //F-B
-            s, s, s, 1.0f, 1.0f,-1.0f,  0.0f,  0.0f, //B-B
-            s, -s, s, 1.0f, 0.0f,-1.0f,  0.0f,  0.0f, //B-C
-            s, -s, -s, 0.0f, 0.0f,-1.0f,  0.0f,  0.0f  //F-C
+            s, s, -s, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, //F-B
+            s, s, s, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, //B-B
+            s, -s, s, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, //B-C
+            s, -s, -s, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f  //F-C
     };
     std::array<float, size> left = {
-            -s, s, s, 0.0f, 1.0f,1.0f,  0.0f,  0.0f, //B-A
-            -s, s, -s, 1.0f, 1.0f,1.0f,  0.0f,  0.0f, //F-A
-            -s, -s, -s, 1.0f, 0.0f,1.0f,  0.0f,  0.0f, //F-D
-            -s, -s, s, 0.0f, 0.0f,1.0f,  0.0f,  0.0f //B-D
+            -s, s, s, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, //B-A
+            -s, s, -s, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, //F-A
+            -s, -s, -s, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, //F-D
+            -s, -s, s, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f //B-D
     };
     std::array<float, size> top = {
-            -s, s, s, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f, //B-A
-            s, s, s, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f, //B-B
-            s, s, -s, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f, //F-B
-            -s, s, -s, 0.0f, 0.0f, 0.0f,  1.0f,  0.0f,  //F-A
+            -s, s, s, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //B-A
+            s, s, s, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, //B-B
+            s, s, -s, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, //F-B
+            -s, s, -s, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,  //F-A
     };
     std::array<float, size> bottom = {
-            -s, -s, -s, 0.0f, 1.0f,0.0f, -1.0f,  0.0f,//F-D
-            s, -s, -s, 1.0f, 1.0f,0.0f, -1.0f,  0.0f,//F-C
-            s, -s, s, 1.0f, 0.0f,0.0f, -1.0f,  0.0f,//B-C
-            -s, -s, s, 0.0f, 0.0f,0.0f, -1.0f,  0.0f,//B-D
+            -s, -s, -s, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,//F-D
+            s, -s, -s, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,//F-C
+            s, -s, s, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,//B-C
+            -s, -s, s, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,//B-D
     };
     unsigned short indices[] = {
             0, 1, 3,
@@ -143,6 +380,31 @@ void Renderer::initCubeInstancing(ShaderLoader *shader) {
         facesVAOs[k] = VAO;
         facesIBOs[k] = IBO;
     }
+    // configure depth map FBO
+    // -----------------------
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    FBO = depthMapFBO;
+    // create depth texture
+    unsigned int depthMapAux;
+    glGenTextures(1, &depthMapAux);
+    depthMap = depthMapAux;
+    glBindTexture(GL_TEXTURE_2D, depthMapAux);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
+                 NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = {1.0, 1.0, 1.0, 1.0};
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapAux, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::killUselessNeighbours(Cube *cube) {
@@ -162,7 +424,7 @@ void Renderer::killUselessNeighbours(Cube *cube) {
     };
 
     for (int i = 0; i < 6; ++i)
-        cube->setRenderFace(i,cubeList.find(checkSurroundings[i]) == cubeList.end());
+        cube->setRenderFace(i, cubeList.find(checkSurroundings[i]) == cubeList.end());
 }
 
 Renderer::Renderer(const std::unordered_map<std::string, Cube *> &cubeList) : cubeList(cubeList) {}
@@ -188,7 +450,7 @@ void Renderer::deleteFace(int x, int y, int z, int side) {
 
 void Renderer::createFace(int x, int y, int z, int side) {
     Cube *cube = cubeList[std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z)];
-    cube->setRenderFace(side,true);
+    cube->setRenderFace(side, true);
     std::vector<glm::vec4> *off = &faceOffsets[side];
     off->push_back(glm::vec4(x, y, z, cube->getTextureArrayIndexs()[side]));
     reloadIBO(facesIBOs[side], off);
@@ -230,7 +492,7 @@ void Renderer::addCube(RaySelection *raySelection, unsigned short cubeType) {
                     y_n = i == 4 ? y + s : y - s;
                 cubeList[std::to_string(x_n) + "," +
                          std::to_string(y_n) + "," +
-                         std::to_string(z_n)]->setRenderFace(i_n,false);
+                         std::to_string(z_n)]->setRenderFace(i_n, false);
                 deleteFace(x_n, y_n, z_n, i_n);
             }
         }

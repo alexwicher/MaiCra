@@ -21,6 +21,7 @@ public:
 
 private:
     std::array<unsigned int, 6> facesVAOs;
+    unsigned int FBO,depthMap;
 
     void killUselessNeighbours(Cube *cube);
 
@@ -29,6 +30,7 @@ private:
     void deleteFace(int x, int y, int z, int side);
 
     void reloadIBO(unsigned int IBOid, std::vector<glm::vec4> *e);
+
     int getFaceFromRetroRay(glm::vec3 retroRay);
 
 public:
@@ -36,13 +38,14 @@ public:
     std::unordered_map<std::string, Cube *> cubeList;
     std::array<unsigned int, 6> facesIBOs;
 
-    void addCube(RaySelection * raySelection,unsigned short cubeType);
+    void addCube(RaySelection *raySelection, unsigned short cubeType);
 
     void removeCube(std::string cubeKey);
 
-    void initCubeInstancing(ShaderLoader *shader);
+    void initCubeInstancing(ShaderLoader *shader, ShaderLoader *debugDepthQuad);
 
-    void renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera,glm::vec3 lightDirection);
+    void renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera, glm::vec3 lightDirection,
+                     ShaderLoader *depthShader,ShaderLoader * debugDepthQuad);
 
     RaySelection *getCubeFromMouseRay(Camera *camera);
 

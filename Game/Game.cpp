@@ -23,7 +23,7 @@ int Game::startGame() {
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::unordered_map<std::string, Cube *> dumbMap;
-    Cube pee = Cube(GRASS_BLOCK,glm::vec3(55,5,5));
+    Cube pee = Cube(GRASS_BLOCK, glm::vec3(55, 5, 5));
     int x = 128, y = 8, z = 128;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
@@ -34,20 +34,23 @@ int Game::startGame() {
     }
     ShaderLoader shader = ShaderLoader(const_cast<char *>("../Shader/rtsShader.vert"),
                                        const_cast<char *>("../Shader/rtsShader.frag"));
+    ShaderLoader debugDepthQuad = ShaderLoader(const_cast<char *>("../Shader/debugDepthQuad.vert"),
+                                               const_cast<char *>("../Shader/debugDepthQuad.frag"));
+    ShaderLoader shadowMappingDepth = ShaderLoader(const_cast<char *>("../Shader/shadowMappingDepth.vert"),
+                                               const_cast<char *>("../Shader/shadowMappingDepth.frag"));
 
     Control control = Control();
-    Camera camera = Camera(glm::vec3(x/2, y + 1.5, z/2));
+    Camera camera = Camera(glm::vec3(x / 2, y + 1.5, z / 2));
 
     Renderer renderer = Renderer(dumbMap);
-    renderer.initCubeInstancing(&shader);
+    renderer.initCubeInstancing(&shader,&debugDepthQuad);
     bool loop = true;
     unsigned int lastFrame = 0, deltaTime = 0;    // time between current frame and last frame
     while (loop) {
         control.handleControlsEvenst(&camera, &renderer, &loop, window, deltaTime);
-        glm::vec3 lightDirection = glm::vec3( -0.2f, -1.0f, -0.3f);
+        glm::vec3 lightDirection = glm::vec3(-0.2f, -1.0f, -0.3f);
 
-        renderer.renderCubes(textureArray, &shader, &camera,lightDirection);
-
+        renderer.renderCubes(textureArray, &shader, &camera, lightDirection,&shadowMappingDepth,&debugDepthQuad);
 
 
         unsigned int currentFrame = SDL_GetTicks();
