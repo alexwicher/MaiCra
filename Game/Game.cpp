@@ -23,8 +23,7 @@ int Game::startGame() {
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::unordered_map<std::string, Cube *> dumbMap;
-    Cube pee = Cube(GRASS_BLOCK, glm::vec3(55, 5, 5));
-    int x = 128, y = 8, z = 128;
+    int x = 4, y = 1, z = 4;
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             for (int k = 0; k < z; ++k) {
