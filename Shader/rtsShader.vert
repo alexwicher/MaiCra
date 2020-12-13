@@ -19,10 +19,11 @@ uniform mat4 lightSpaceMatrix;
 
 void main()
 {
-	vs_out.FragPos = vec3(vec4(position + aOffset.xyz, 1.0));
+	vs_out.FragPos = vec3(position + aOffset.xyz);
+
 	vs_out.Normal = (aNormal);
 	vs_out.coords = vec3(textCoords,aOffset.w);
 	vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
 
-	gl_Position = projection * view * vec4(position + aOffset.xyz, 1.0f);
+	gl_Position = projection * view * vec4(vs_out.FragPos, 1.0f);
 }

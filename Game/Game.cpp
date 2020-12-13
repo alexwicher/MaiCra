@@ -39,6 +39,7 @@ int Game::startGame() {
     dumbMap[getKey(0,1,1)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0,1,1)));
     dumbMap[getKey(0,1,-1)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0,1,-1)));
     dumbMap[getKey(0,2,0)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0,2,0)));
+    dumbMap[getKey(4,6,0)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(4,6,0)));
 
     ShaderLoader shader = ShaderLoader(const_cast<char *>("../Shader/rtsShader.vert"),
                                        const_cast<char *>("../Shader/rtsShader.frag"));
@@ -56,7 +57,7 @@ int Game::startGame() {
     unsigned int lastFrame = 0, deltaTime = 0;    // time between current frame and last frame
     while (loop) {
         control.handleControlsEvenst(&camera, &renderer, &loop, window, deltaTime);
-        glm::vec3 lightDirection = glm::vec3(-0.2f, -1.0f, -0.3f);
+        glm::vec3 lightDirection = glm::vec3(4.0f,6.0f,0.0f);
 
         renderer.renderCubes(textureArray, &shader, &camera, lightDirection,&shadowMappingDepth,&debugDepthQuad);
 

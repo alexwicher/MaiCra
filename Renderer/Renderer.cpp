@@ -35,7 +35,13 @@ void renderQuad() {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
-
+void renderScene(std::array<unsigned int, 6> facesVAOs,std::array<std::vector<glm::vec4>, 6> faceOffsets){
+    for (int i = 0; i < facesVAOs.size(); ++i) {
+        unsigned int VAO = facesVAOs[i];
+        glBindVertexArray(VAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
+    }
+}
 void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Camera *camera, glm::vec3 lightDirection,
                            ShaderLoader *depthShader, ShaderLoader *debugDepthQuad) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -57,14 +63,10 @@ void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Came
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glClear(GL_DEPTH_BUFFER_BIT);
-
     glActiveTexture(GL_TEXTURE0);
+
     glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-    for (int i = 0; i < facesVAOs.size(); ++i) {
-        unsigned int VAO = facesVAOs[i];
-        glBindVertexArray(VAO);
-        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
-    }
+    renderScene(facesVAOs,faceOffsets);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // reset viewport
@@ -96,22 +98,18 @@ void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Came
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    for (int i = 0; i < facesVAOs.size(); ++i) {
-        unsigned int VAO = facesVAOs[i];
-        glBindVertexArray(VAO);
-        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0, static_cast<GLsizei>(faceOffsets[i].size()));
-    }
-
+    renderScene(facesVAOs,faceOffsets);
 
     // render Depth map to quad for visual debugging, uncomment to see depth frameBuffer
     // ---------------------------------------------
-//    debugDepthQuad->use();
-//    debugDepthQuad->setFloat("near_plane", near_plane);
-//    debugDepthQuad->setFloat("far_plane", far_plane);
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_2D, depthMap);
+    debugDepthQuad->use();
+    debugDepthQuad->setFloat("near_plane", near_plane);
+    debugDepthQuad->setFloat("far_plane", far_plane);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
 //    renderQuad();
 
 }
