@@ -46,7 +46,7 @@ void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Came
     // ---------------------------------------------------------
     glm::mat4 lightProjection, lightView;
     glm::mat4 lightSpaceMatrix;
-    float near_plane = 1.0f, far_plane = 9.5f;
+    float near_plane = 1.0f, far_plane = 17.5f;
     lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
     lightView = glm::lookAt(lightDirection, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
     lightSpaceMatrix = lightProjection * lightView;
@@ -78,6 +78,8 @@ void Renderer::renderCubes(unsigned int textureArray, ShaderLoader *shader, Came
     shader->use();
     shader->setVec3("light.direction", lightDirection);
     shader->setVec3("viewPos", camera->pos);
+    shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
 
     // light properties
     shader->setVec3("light.ambient", glm::vec3(0.1, 0.1, 0.1));

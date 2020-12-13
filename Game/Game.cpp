@@ -23,14 +23,23 @@ int Game::startGame() {
     TextureLoader textureLoader = TextureLoader();
     unsigned int textureArray = textureLoader.loadCubeTextures();
     std::unordered_map<std::string, Cube *> dumbMap;
-    int x = 4, y = 1, z = 4;
-    for (int i = 0; i < x; ++i) {
-        for (int j = 0; j < y; ++j) {
-            for (int k = 0; k < z; ++k) {
-                dumbMap[getKey(i, j, k)] = (new Cube(GRASS_BLOCK, glm::vec3(i, j, k)));
-            }
-        }
-    }
+    int x = 1, y = 1, z = 1;
+//    for (int i = 0; i < x; ++i) {
+//        for (int j = 0; j < y; ++j) {
+//            for (int k = 0; k < z; ++k) {
+//                dumbMap[getKey(i, j, k)] = (new Cube(GRASS_BLOCK, glm::vec3(i, j, k)));
+//            }
+//        }
+//    }
+
+    dumbMap[getKey(0,0,0)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0, 0, 0)));
+    dumbMap[getKey(0,1,0)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0,1,0)));
+    dumbMap[getKey(1,1,0)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(1,1,0)));
+    dumbMap[getKey(-1,1,0)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(-1,1,0)));
+    dumbMap[getKey(0,1,1)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0,1,1)));
+    dumbMap[getKey(0,1,-1)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0,1,-1)));
+    dumbMap[getKey(0,2,0)] = (new Cube(STONE_BRICK_BLOCK, glm::vec3(0,2,0)));
+
     ShaderLoader shader = ShaderLoader(const_cast<char *>("../Shader/rtsShader.vert"),
                                        const_cast<char *>("../Shader/rtsShader.frag"));
     ShaderLoader debugDepthQuad = ShaderLoader(const_cast<char *>("../Shader/debugDepthQuad.vert"),
